@@ -5,20 +5,12 @@
  */
 package fxlab.ui.ctrl;
 
-import com.sun.jna.Library;
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.WString;
-import com.sun.jna.platform.WindowUtils;
-import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.Kernel32Util;
-import com.sun.jna.platform.win32.WinBase;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.PointerByReference;
 import fxlab.win32.Kernel32;
 import fxlab.win32.WINAPI;
 import java.io.File;
@@ -61,6 +53,9 @@ public class FXMLLabController implements Initializable {
     @FXML
     private Button btn_export;
     
+    /**
+     * Constants for register appropriate name of message for the WinForm property: .Name
+     */
     private enum ContsantsMessages {
         DOT_NET_GET_CONTROL_NAME("WM_GETCONTROLNAME"),
         VB6_GET_CONTROL_NAME("Get_CONTROLNAME");
@@ -76,23 +71,16 @@ public class FXMLLabController implements Initializable {
             return this.value;
         }
     };
-    
-    private enum PageProtection {
-        NO_ACCESS(0x01), READ_WRITE(0x04);
-        
-        private final int value;
-
-        private PageProtection(int value) {
-            this.value = value;
-        }
-        
-    };
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadApplications();
     }    
     
+    /**
+     * This method get all the applications is current load in the Operating system
+     * and store the name in the combo-box control, to show user
+     */
     private void loadApplications() {
         ObservableList<String> applications= FXCollections.observableArrayList();
         
@@ -113,20 +101,44 @@ public class FXMLLabController implements Initializable {
             this.cmb_application.setItems(applications);
     }
     
+    /**
+     * This method get a Pointer or Handler of applications selected by the user
+     * in combo-box.
+     * 
+     * @param name
+     *          The name of application we want to know the Handler.
+     * 
+     * @return 
+     *      A Pointer or Window Handler by it's name.
+     */
     private WinDef.HWND getHandlerActiveWindow(String name) {
         return WINAPI.INSTANCE_API.FindWindow(null, name);
     }
     
+    /**
+     * This method just clear the text area, that use for logging purpose
+     */
     private void clear() {
         this.txta_log.clear();
     }
     
+    /**
+     * This method lookups for children in parent window or control and logging if
+     * find any.
+     * 
+     * @param parentHandler
+     *          Pointer or window Handler of the parent window (control) that we 
+     *          want to looking for children.
+     * 
+     * @param pid 
+     *          The number of the Process ID is run the target application.
+     */
     private void getChildWindows(WinDef.HWND parentHandler, IntByReference pid) {
         WinDef.HWND childHandle= WINAPI.INSTANCE_API.FindWindowEx(parentHandler, null, null, null);
         int i= 0;
         final int MAX= 100;
         char[] buffer= new char[1024];
-        String nameControl= null;
+        String nameControl;
         
         while (i++ < MAX) {            
             childHandle= WINAPI.INSTANCE_API.FindWindowEx(parentHandler, childHandle, null, null);
@@ -144,6 +156,19 @@ public class FXMLLabController implements Initializable {
         }
     }
     
+    /**
+     * This method return the ID of an specific window or control
+     * 
+     * @param hWnd
+     *          Handler or Pointer of window (Control) we want to know the ID ({@code .Name} property in WinForms)
+     * 
+     * @param pid
+     *          The number of the Process ID is run the target application.
+     * 
+     * @return 
+     *      This method return the ID ({@code .Name} property in WinForms) of an 
+     *      specific window or control
+     */
     private String getNameProperty(WinDef.HWND hWnd, IntByReference pid) {
         String result= "";
         
@@ -160,24 +185,30 @@ public class FXMLLabController implements Initializable {
         WinNT.HANDLE processHandle= null;
         
         try {
+            // Register message for know the .Name property of the window Handler pass in parameter
             msg= WINAPI.INSTANCE_API.
                 RegisterWindowMessage(ContsantsMessages.DOT_NET_GET_CONTROL_NAME.
                         toString());
         
+            // create a process with shared memory.
             processHandle= Kernel32.INSTANCE_API.
                                 OpenProcess(Kernel32.PROCESS_VM_OPERATION | 
                                         Kernel32.PROCESS_VM_READ | 
                                         Kernel32.PROCESS_VM_WRITE, false, pid.getValue());
 
             if (processHandle != null) {
+                // allocate an space of memory that will contains the result of .Name property
                 bufferMen= Kernel32.INSTANCE_API.VirtualAllocEx(processHandle, 0, size + 1, 
                         Kernel32.MEM_RESERVE | Kernel32.MEM_COMMIT, Kernel32.PAGE_READWRITE);
 
                 if (bufferMen != null) {
+                    // send the message to target application and specific window (Control)
                     retLength= WINAPI.INSTANCE_API.SendMessage(hWnd, msg, size + 1, bufferMen);
 
+                    // read the shared memory and get the value of .name property.
                     retVal= Kernel32.INSTANCE_API.ReadProcessMemory(processHandle, bufferMen, nameProperty, size + 1, written);
 
+                    // if read was successfull then converto to String the value.
                     if (retVal)
                         result= Native.toString(nameProperty);
                     
@@ -192,6 +223,7 @@ public class FXMLLabController implements Initializable {
             
         } finally {
             if (processHandle != null) {
+                // realese the memory allocate
                 retVal= Kernel32.INSTANCE_API.VirtualFreeEx(processHandle, bufferMen, 0, Kernel32.MEM_RELEASE);
             
                 if (!retVal)
@@ -207,19 +239,24 @@ public class FXMLLabController implements Initializable {
         this.clear();
         
         if (!this.cmb_application.getSelectionModel().isEmpty()) {
+            // get the Handler or Pointer of application selected by user
             WinDef.HWND hActive= getHandlerActiveWindow(this.cmb_application.getSelectionModel().getSelectedItem());
                     
             if (hActive != null) {
                 IntByReference pid= new IntByReference();
+                
+                // get the number of Process ID of target application
                 WINAPI.INSTANCE_API.GetWindowThreadProcessId(hActive, pid);
 
                 this.txta_log.appendText(String.format("Process ID: %d%s", pid.getValue(), System.getProperty("line.separator")));
             
+                // looking for any child window (Control) of the target application
                 WINAPI.INSTANCE_API.EnumChildWindows(hActive, (WinDef.HWND hwnd, Pointer pntr) -> {
                     char[] buffer= new char[1024];
                     String nameControl= null;
                     
                     if (WINAPI.INSTANCE_API.IsWindowVisible(hwnd)) {
+                        // get the name of the class of Control child
                         WINAPI.INSTANCE_API.GetClassName(hwnd, buffer, buffer.length);
                         nameControl= Native.toString(buffer);
 
@@ -237,12 +274,6 @@ public class FXMLLabController implements Initializable {
                         this.txta_log.appendText(String.format("\tName Property: %s%n", getNameProperty(hwnd, pid)));
                         
                         getChildWindows(hwnd, pid);
-                        /*
-                        WINAPI.INSTANCE_API.EnumPropsEx(hwnd, (WinDef.HWND hWnd, WString lpszString, WinNT.HANDLE hData, BaseTSD.ULONG_PTR dwData) -> {
-                            this.txta_log.appendText(String.format("\tProperty Ex: %s%n", lpszString));
-                            
-                            return true;
-                        }, null); */
                     }
                     
                     return true;

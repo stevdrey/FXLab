@@ -5,25 +5,53 @@
  */
 package fxlab.win32;
 
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 import com.sun.jna.WString;
-import com.sun.jna.platform.WindowUtils;
 import com.sun.jna.platform.win32.User32;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.W32APIOptions;
 
 /**
- *
+ * This Interface handles all the native call of methods in User32.h of Win32Api
+ * 
  * @author srey
  */
 public interface WINAPI extends User32{
+    /**
+     * Singleton instance of this Interface
+     */
     WINAPI INSTANCE_API= (WINAPI) Native.loadLibrary("user32", WINAPI.class, W32APIOptions.DEFAULT_OPTIONS);
-    
-    int SendMessageW(HWND hWnd, int msg, int wParam, byte[] lParam);
-    
+        
+    /**
+     * Retrieves a handle to a window whose class name and window name match the specified strings. 
+     * The function searches child windows, beginning with the one following the specified child window. 
+     * This function does not perform a case-sensitive search.
+     * 
+     * @param parent
+     *          A handle to the parent window whose child windows are to be searched.
+     *          If hwndParent is NULL, the function uses the desktop window as the parent window. 
+     *          The function searches among windows that are child windows of the desktop.
+     *          If hwndParent is HWND_MESSAGE, the function searches all message-only windows.
+     * 
+     * @param child
+     *          A handle to a child window. The search begins with the next child window in the Z order. 
+     *          The child window must be a direct child window of hwndParent, not just a descendant window.
+     *          If hwndChildAfter is NULL, the search begins with the first child window of hwndParent.
+     *          Note that if both hwndParent and hwndChildAfter are NULL, the function searches all top-level and message-only windows.
+     * 
+     * @param className
+     *          The class name or a class atom created by a previous call to the RegisterClass or RegisterClassEx function. 
+     *          The atom must be placed in the low-order word of lpszClass; the high-order word must be zero.
+     *          If lpszClass is a string, it specifies the window class name. 
+     *          The class name can be any name registered with RegisterClass or RegisterClassEx, or any of the predefined control-class names, or it can be MAKEINTATOM(0x8000). 
+     *          In this latter case, 0x8000 is the atom for a menu class. For more information, see the Remarks section of this topic.
+     * 
+     * @param window
+     *          The window name (the window's title). If this parameter is NULL, all window names match.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a handle to the window that has the specified class and window names.
+     *      If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+     */
     HWND FindWindowEx(HWND parent, HWND child, String className, String window);
     
     /**
@@ -70,9 +98,7 @@ public interface WINAPI extends User32{
      * 
      * @return 
      *      The return value specifies the result of the message processing; it depends on the message sent.
-     */
-    LRESULT SendMessage(HWND hWnd, int Msg, IntByReference wParam, IntByReference lParam);
-    
+     */    
     int SendMessage(HWND hWnd, int Msg, int wParam, HANDLE lParam);
     
     /**

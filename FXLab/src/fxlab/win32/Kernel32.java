@@ -6,18 +6,22 @@
 package fxlab.win32;
 
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.ByteByReference;
-import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.win32.W32APIOptions;
 
 /**
- *
+ * This Interface handles all the native call of methods in Kernel32.h of Win32Api
+ * 
  * @author srey
  */
 public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
+    /**
+     * Singleton instance of this Interface.
+     */
     Kernel32 INSTANCE_API= (Kernel32) Native.loadLibrary("Kernel32", Kernel32.class, W32APIOptions.DEFAULT_OPTIONS);
     
+    /**
+     * This flag means we want to release a shared memory.
+     */
     final int MEM_RELEASE= 0x8000;
     
     /**
@@ -165,18 +169,4 @@ public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
      *      If the function fails, the return value is 0 (zero). To get extended error information, call GetLastError.
      */
     boolean VirtualFreeEx(HANDLE hProcess, HANDLE lpAddress, int dwSize, int  dwFreeType);
-    
-    /**
-     * Moves a block of memory from one location to another.
-     * 
-     * @param Destination
-     *          A pointer to the starting address of the move destination.
-     * 
-     * @param Source
-     *          A pointer to the starting address of the block of memory to be moved.
-     * 
-     * @param Length 
-     *          The size of the block of memory to move, in bytes.
-     */
-    void RtlMoveMemory (Pointer Destination, Pointer Source, int Length);
 }
