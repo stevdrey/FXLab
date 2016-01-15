@@ -7,7 +7,6 @@ package fxlab.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.WString;
-import com.sun.jna.platform.win32.User32;
 import com.sun.jna.win32.W32APIOptions;
 
 /**
@@ -15,11 +14,11 @@ import com.sun.jna.win32.W32APIOptions;
  * 
  * @author srey
  */
-public interface WINAPI extends User32{
+public interface User32 extends com.sun.jna.platform.win32.User32{
     /**
      * Singleton instance of this Interface
      */
-    WINAPI INSTANCE_API= (WINAPI) Native.loadLibrary("user32", WINAPI.class, W32APIOptions.DEFAULT_OPTIONS);
+    User32 INSTANCE_API= (User32) Native.loadLibrary("user32", User32.class, W32APIOptions.DEFAULT_OPTIONS);
         
     /**
      * Retrieves a handle to a window whose class name and window name match the specified strings. 

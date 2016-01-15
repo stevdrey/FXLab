@@ -12,7 +12,6 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
 import fxlab.win32.Kernel32;
-import fxlab.win32.WINAPI;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import fxlab.win32.User32;
 
 /**
  * FXML Controller class
@@ -84,11 +84,11 @@ public class FXMLLabController implements Initializable {
     private void loadApplications() {
         ObservableList<String> applications= FXCollections.observableArrayList();
         
-        WINAPI.INSTANCE_API.EnumWindows((WinDef.HWND hwnd, Pointer pntr) -> {
+        User32.INSTANCE_API.EnumWindows((WinDef.HWND hwnd, Pointer pntr) -> {
             char[] bufferApp= new char[1024];
             String nameApp= null;
             
-            WINAPI.INSTANCE_API.GetWindowText(hwnd, bufferApp, bufferApp.length);
+            User32.INSTANCE_API.GetWindowText(hwnd, bufferApp, bufferApp.length);
             nameApp= Native.toString(bufferApp);
             
             if (nameApp != null && !nameApp.isEmpty())
@@ -112,7 +112,7 @@ public class FXMLLabController implements Initializable {
      *      A Pointer or Window Handler by it's name.
      */
     private WinDef.HWND getHandlerActiveWindow(String name) {
-        return WINAPI.INSTANCE_API.FindWindow(null, name);
+        return User32.INSTANCE_API.FindWindow(null, name);
     }
     
     /**
@@ -134,17 +134,17 @@ public class FXMLLabController implements Initializable {
      *          The number of the Process ID is run the target application.
      */
     private void getChildWindows(WinDef.HWND parentHandler, IntByReference pid) {
-        WinDef.HWND childHandle= WINAPI.INSTANCE_API.FindWindowEx(parentHandler, null, null, null);
+        WinDef.HWND childHandle= User32.INSTANCE_API.FindWindowEx(parentHandler, null, null, null);
         int i= 0;
         final int MAX= 100;
         char[] buffer= new char[1024];
         String nameControl;
         
         while (i++ < MAX) {            
-            childHandle= WINAPI.INSTANCE_API.FindWindowEx(parentHandler, childHandle, null, null);
+            childHandle= User32.INSTANCE_API.FindWindowEx(parentHandler, childHandle, null, null);
             
             if (childHandle != null && childHandle.getPointer() != Pointer.NULL) {
-                WINAPI.INSTANCE_API.GetClassName(childHandle, buffer, buffer.length);
+                User32.INSTANCE_API.GetClassName(childHandle, buffer, buffer.length);
                 nameControl= Native.toString(buffer);
                 
                 if (nameControl != null && !nameControl.isEmpty())
@@ -186,7 +186,7 @@ public class FXMLLabController implements Initializable {
         
         try {
             // Register message for know the .Name property of the window Handler pass in parameter
-            msg= WINAPI.INSTANCE_API.
+            msg= User32.INSTANCE_API.
                 RegisterWindowMessage(ContsantsMessages.DOT_NET_GET_CONTROL_NAME.
                         toString());
         
@@ -203,7 +203,7 @@ public class FXMLLabController implements Initializable {
 
                 if (bufferMen != null) {
                     // send the message to target application and specific window (Control)
-                    retLength= WINAPI.INSTANCE_API.SendMessage(hWnd, msg, size + 1, bufferMen);
+                    retLength= User32.INSTANCE_API.SendMessage(hWnd, msg, size + 1, bufferMen);
 
                     // read the shared memory and get the value of .name property.
                     retVal= Kernel32.INSTANCE_API.ReadProcessMemory(processHandle, bufferMen, nameProperty, size + 1, written);
@@ -246,25 +246,25 @@ public class FXMLLabController implements Initializable {
                 IntByReference pid= new IntByReference();
                 
                 // get the number of Process ID of target application
-                WINAPI.INSTANCE_API.GetWindowThreadProcessId(hActive, pid);
+                User32.INSTANCE_API.GetWindowThreadProcessId(hActive, pid);
 
                 this.txta_log.appendText(String.format("Process ID: %d%s", pid.getValue(), System.getProperty("line.separator")));
             
                 // looking for any child window (Control) of the target application
-                WINAPI.INSTANCE_API.EnumChildWindows(hActive, (WinDef.HWND hwnd, Pointer pntr) -> {
+                User32.INSTANCE_API.EnumChildWindows(hActive, (WinDef.HWND hwnd, Pointer pntr) -> {
                     char[] buffer= new char[1024];
                     String nameControl= null;
                     
-                    if (WINAPI.INSTANCE_API.IsWindowVisible(hwnd)) {
+                    if (User32.INSTANCE_API.IsWindowVisible(hwnd)) {
                         // get the name of the class of Control child
-                        WINAPI.INSTANCE_API.GetClassName(hwnd, buffer, buffer.length);
+                        User32.INSTANCE_API.GetClassName(hwnd, buffer, buffer.length);
                         nameControl= Native.toString(buffer);
 
                         if (nameControl != null && !nameControl.isEmpty())
                             this.txta_log.appendText(String.format("Control Name: %s%s", 
                                     nameControl, System.getProperty("line.separator")));
                         
-                        WINAPI.INSTANCE_API.RealGetWindowClass(hwnd, buffer, buffer.length);
+                        User32.INSTANCE_API.RealGetWindowClass(hwnd, buffer, buffer.length);
                         nameControl= Native.toString(buffer);
                         
                         if (nameControl != null && !nameControl.isEmpty())
