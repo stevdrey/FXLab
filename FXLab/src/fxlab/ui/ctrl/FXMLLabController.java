@@ -31,6 +31,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import fxlab.win32.User32;
+import fxlab.win32.enu.ContsantsMessages;
 
 /**
  * FXML Controller class
@@ -52,25 +53,6 @@ public class FXMLLabController implements Initializable {
     private Button btn_clear;
     @FXML
     private Button btn_export;
-    
-    /**
-     * Constants for register appropriate name of message for the WinForm property: .Name
-     */
-    private enum ContsantsMessages {
-        DOT_NET_GET_CONTROL_NAME("WM_GETCONTROLNAME"),
-        VB6_GET_CONTROL_NAME("Get_CONTROLNAME");
-        
-        private String value;
-
-        private ContsantsMessages(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return this.value;
-        }
-    };
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
