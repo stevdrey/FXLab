@@ -1,7 +1,7 @@
 # FXLab
 Lab to UI Atomatization in WinForms
 
-Dependencies:
+**Dependencies:**
   1. JNA: https://github.com/java-native-access/jna
   2. JNativeHook: https://github.com/kwhat/jnativehook
   3. JDK version: Java 8u66 http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
