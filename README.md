@@ -17,5 +17,5 @@ Lab to UI Atomatization in WinForms
       5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box or ListBox
       6. One Button for "Record" or Listening click Events of Mouse
 
-** *Notes: **
+**Notes:**
   1. If your Architecture is x64 you must download JDK for architecture x64, because JVM not responds well in compatibility mode.
