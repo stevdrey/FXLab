@@ -7,7 +7,7 @@ Lab to UI Atomatization in WinForms
   3. JDK version: Java 8u66 http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
   4. Scene Builder 2.0: http://www.oracle.com/technetwork/java/javafxscenebuilder-1x-archive-2199384.html
 
-Tasks:
+**Tasks:**
   1. Create a Form with the following specifications:
       1. One Label and Combo-Box for user can select the target application
       2. One Label and Textbox for Class Name of the Window (Control) select by User
@@ -17,5 +17,5 @@ Tasks:
       5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box or ListBox
       6. One Button for "Record" or Listening click Events of Mouse
 
-*Notes:
+***Notes:**
   1. If your Architecture is x64 you must download JDK for architecture x64, because JVM not responds well in compatibility mode.
