@@ -12,6 +12,7 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.org.apache.bcel.internal.classfile.ConstantClass;
+import fxlab.ui.enu.TypeControl;
 import fxlab.win32.Kernel32;
 import fxlab.win32.User32;
 import fxlab.win32.enu.ContsantsMessages;
@@ -214,31 +215,37 @@ public class FXMLWindowPropertiesController implements Initializable {
 
                 if (bufferMen != null) {
                     // send the message to target application and specific window (Control)
-                    retLength= User32.INSTANCE_API.SendMessage(hWnd, msg, size + 1, bufferMen);
+                    retLength= user32.SendMessage(hWnd, msg, size + 1, bufferMen);
 
                     // read the shared memory and get the value of .name property.
-                    retVal= Kernel32.INSTANCE_API.ReadProcessMemory(processHandle, bufferMen, nameProperty, size + 1, written);
+                    retVal= kernel32.ReadProcessMemory(processHandle, bufferMen, 
+                            nameProperty, size + 1, written);
 
                     // if read was successfull then converto to String the value.
                     if (retVal)
                         result= Native.toString(nameProperty);
                     
                     else
-                        System.err.println(String.format("Error message when try to read process: %s", Kernel32Util.getLastErrorMessage()));
+                        System.err.println(String.format("Error message when try to read process: %s", 
+                                Kernel32Util.getLastErrorMessage()));
                     
                 } else
-                    System.err.println(String.format("Error message when try to allocate memory: %s", Kernel32Util.getLastErrorMessage()));
+                    System.err.println(String.format("Error message when try to allocate memory: %s", 
+                            Kernel32Util.getLastErrorMessage()));
                 
             } else
-                System.err.println(String.format("Error message when try to open new process: %s", Kernel32Util.getLastErrorMessage()));
+                System.err.println(String.format("Error message when try to open new process: %s", 
+                        Kernel32Util.getLastErrorMessage()));
             
         } finally {
             if (processHandle != null) {
                 // realese the memory allocate
-                retVal= Kernel32.INSTANCE_API.VirtualFreeEx(processHandle, bufferMen, 0, Kernel32.MEM_RELEASE);
+                retVal= kernel32.VirtualFreeEx(processHandle, bufferMen, 0, 
+                        Kernel32.MEM_RELEASE);
             
                 if (!retVal)
-                    System.err.println(String.format("Error message free allocate memory: %s", Kernel32Util.getLastErrorMessage()));
+                    System.err.println(String.format("Error message free allocate memory: %s", 
+                            Kernel32Util.getLastErrorMessage()));
             }
         }
         
@@ -298,38 +305,82 @@ public class FXMLWindowPropertiesController implements Initializable {
      *          The pointer or handler of the Window (Control) we want to know its
      *          caption or text value.
      * 
+     * @param type 
+     *          Enum indicate the type of control we want to know text or caption
+     *          of specific Window (Control).
+     * 
      * @return 
      *      Return the text value or caption, depends of its class name or type.
      */
-    private String getText(WinDef.HWND hwnd) {
-        String caption= "";
-        int size= getTextLength(hwnd);
+    private String getText(WinDef.HWND hwnd, TypeControl type) {
+        String text= "";
+        int size= getTextLength(hwnd, type);
+        int message= 0;
         char[] buffer= new char[size == 0 ? 1024 : size];
         
         if (hwnd != null) {
-            user32.SendMessage(hwnd, User32.WM_GETTEXT, buffer.length, buffer);
-            caption= Native.toString(buffer);
+            switch (type) {
+                case COMBO_BOX:
+                    message= User32.CB_GETLBTEXT;
+                    
+                    break;
+                    
+                case LIST_BOX:
+                    message= User32.LB_GETTEXT;
+                    
+                    break;
+                    
+                default:
+                    message= User32.WM_GETTEXT;
+                    
+                    break;
+            }
+            
+            user32.SendMessage(hwnd, message, buffer.length, buffer);
+            text= Native.toString(buffer);
         }
         
-        return caption;
+        return text;
     }
     
-    private int getTextLength(WinDef.HWND hwnd) {
+    /**
+     * This method get the size or length of text/caption of specific Window (Control)
+     * 
+     * @param hwnd
+     *          The pointer or handler of the Window (Control) we want to know its
+     *          length of text/caption.
+     * 
+     * @param type
+     *          Enum indicate the type of control we want to know text or caption
+     *          of specific Window (Control).
+     * 
+     * @return 
+     *      Return the size or length of text/caption of specific Window (Control).
+     */
+    private int getTextLength(WinDef.HWND hwnd, TypeControl type) {
         int length= 0;
+        int message= 0;
         
-        if (hwnd != null)
-            length= user32.SendMessage(hwnd, User32.WM_GETTEXTLENGTH, 0, 
-                    new WinNT.HANDLE(Pointer.NULL));
-        
-        return length;
-    }
-    
-    private int getListBoxTextLength(WinDef.HWND hwnd) {
-        int length= 0;
-        
-        if (hwnd != null)
-            length= user32.SendMessage(hwnd, User32.LB_GETTEXTLEN, 0, 
-                    new WinNT.HANDLE(Pointer.NULL));
+        if (hwnd != null) {
+            switch (type) {
+                case COMBO_BOX:
+                    message= User32.CB_GETLBTEXTLEN;
+
+                    break;
+
+                case LIST_BOX:
+                    message= User32.LB_GETTEXTLEN;
+
+                    break;
+
+                default:
+                    message= User32.WM_GETTEXTLENGTH;
+
+                    break;
+            }
+            
+            length= user32.SendMessage(hwnd, message, 0, 0);
+        }
         
         return length;
     }
