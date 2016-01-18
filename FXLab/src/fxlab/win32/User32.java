@@ -39,7 +39,17 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      * Constant for gets a string from a list box.
      */
     final int LB_GETTEXT = 0x0189;
-        
+    
+    /**
+     * Constant for gets a length of string in combo-box
+     */
+    final int CB_GETLBTEXTLEN= 0x0149;
+    
+    /**
+     * Constant for gets a string from a combo-box
+     */
+    final int CB_GETLBTEXT= 0x0148;
+    
     /**
      * Retrieves a handle to a window whose class name and window name match the specified strings. 
      * The function searches child windows, beginning with the one following the specified child window. 
@@ -119,6 +129,35 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      *      The return value specifies the result of the message processing; it depends on the message sent.
      */    
     int SendMessage(HWND hWnd, int Msg, int wParam, HANDLE lParam);
+    
+    /**
+     * Sends the specified message to a window or windows. The SendMessage function calls the window 
+     * procedure for the specified window and does not return until the window procedure has processed the message.
+     * To send a message and return immediately, use the SendMessageCallback or SendNotifyMessage function. 
+     * To post a message to a thread's message queue and return immediately, use the PostMessage or PostThreadMessage function.
+     * 
+     * @param hWnd
+     *          A handle to the window whose window procedure will receive the message. If this parameter is HWND_BROADCAST ((HWND)0xffff), 
+     *          the message is sent to all top-level windows in the system, including disabled or invisible unowned windows, overlapped windows, 
+     *          and pop-up windows; but the message is not sent to child windows.
+     * 
+     *          Message sending is subject to UIPI. The thread of a process can send messages only to message queues of threads in 
+     *          processes of lesser or equal integrity level.
+     * 
+     * @param Msg
+     *         The message to be sent.
+     *         For lists of the system-provided messages, see System-Defined Messages.
+     * 
+     * @param wParam
+     *          Additional message-specific information.
+     * 
+     * @param lParam
+     *          Additional message-specific information.
+     * 
+     * @return 
+     *      The return value specifies the result of the message processing; it depends on the message sent.
+     */    
+    int SendMessage(HWND hWnd, int Msg, int wParam, int lParam);
     
     /**
      * Sends the specified message to a window or windows. The SendMessage function calls the window 
