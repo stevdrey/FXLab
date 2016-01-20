@@ -6,6 +6,7 @@
 package fxlab.win32;
 
 import com.sun.jna.Native;
+import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.win32.W32APIOptions;
 
@@ -49,6 +50,20 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      * Constant for gets a string from a combo-box
      */
     final int CB_GETLBTEXT= 0x0148;
+    
+    /**
+     * Constant for gets a selected string in combo-box
+     */
+    final int CB_SELECTSTRING= 0x014D;
+    
+    final int CB_GETITEMDATA= 0x0150;
+    
+    final int CB_GETCURSEL= 0x0147;
+    
+    /**
+     * Does not skip any child windows
+     */
+    final int CWP_ALL= 0x0000;
     
     /**
      * Retrieves a handle to a window whose class name and window name match the specified strings. 
@@ -187,6 +202,68 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      *      The return value specifies the result of the message processing; it depends on the message sent.
      */    
     int SendMessage(HWND hWnd, int Msg, int wParam, char[] lParam);
+    
+    /**
+     * Retrieves a handle to the child window at the specified point. 
+     * The search is restricted to immediate child windows; grandchildren and deeper 
+     * descendant windows are not searched.
+     * 
+     * @param hwndParent
+     *          A handle to the window whose child is to be retrieved.
+     * 
+     * @param point
+     * 
+     * @return 
+     *      The return value is a handle to the child window that contains the specified point.
+     */
+    HWND RealChildWindowFromPoint(HWND hwndParent, POINTByValue point);
+    
+    /**
+     * Retrieves a handle to the window that contains the specified point.
+     * 
+     * @param Point
+     *          The point to be checked.
+     * 
+     * @return 
+     *      The return value is a handle to the window that contains the point. 
+     *      If no window exists at the given point, the return value is NULL. 
+     *      If the point is over a static text control, the return value is a handle to the window under the static text control.
+     */
+    HWND WindowFromPoint(POINTByValue Point);
+    
+    HWND WindowFromPoint(int x, int y);
+    
+    /**
+     * Determines which, if any, of the child windows belonging to the specified parent window contains the specified point. 
+     * The function can ignore invisible, disabled, and transparent child windows. 
+     * The search is restricted to immediate child windows. 
+     * Grandchildren and deeper descendants are not searched.
+     * 
+     * @param hwndParent
+     *          A handle to the parent window.
+     * 
+     * @param point
+     * 
+     * @param uFlags
+     *          The child windows to be skipped.
+     * 
+     * @return 
+     *      The return value is a handle to the first child window that contains the point and meets the criteria specified by uFlags. 
+     *      If the point is within the parent window but not within any child window that meets the criteria, the return value is a handle to the parent window. 
+     *      If the point lies outside the parent window or if the function fails, the return value is NULL.
+     */
+    HWND ChildWindowFromPointEx(HWND hwndParent, POINTByValue point, int uFlags);
+    
+    /**
+     * Retrieves a handle to the window that contains the specified physical point.
+     * 
+     * @param point
+     *          The physical coordinates of the point.
+     * 
+     * @return 
+     *      A handle to the window that contains the given physical point. If no window exists at the point, this value is NULL.
+     */
+    HWND WindowFromPhysicalPoint(POINTByValue point);
     
     /**
      * Enumerates all entries in the property list of a window by passing them, one by one, to the specified callback function. 
