@@ -9,13 +9,15 @@ Lab to UI Atomatization in WinForms
 
 **Tasks:**
   1. Create a Form with the following specifications:
-      1. One Label and Combo-Box for user can select the target application
-      2. One Label and Textbox for Class Name of the Window (Control) select by User
-      3. One Label and TextBox for ID of Window (Control) select by User
+      1. One Label and Combo-Box for user can select the target application: **Done**
+      2. One Label and Textbox for Class Name of the Window (Control) select by User: **Done**
+      3. One Label and TextBox for ID of Window (Control) select by User: **Done**
       4. One Label and TextBox for Captions of Window (Control) select by User, this filed just fill in case the Window (Control) is
-         a Label (class name: Static)
-      5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box or ListBox
-      6. One Button for "Record" or Listening click Events of Mouse
+         a Label (class name: Static): **Done**
+      5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box and List-Box: **Done**
+      6. One Button for "Record" or Listening click Events of Mouse: **Done**
+      7. One listener for focus lost in Window (Control) was clicked.
 
 **Notes:**
   1. If your Architecture is x64 you must download JDK for architecture x64, because JVM not responds well in compatibility mode.
+  2. JNA library has tow .jars: jna-*.jar and jna-platform-*.jar; you need to download both.
