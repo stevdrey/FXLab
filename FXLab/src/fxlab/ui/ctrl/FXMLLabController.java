@@ -31,7 +31,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import fxlab.win32.User32;
-import fxlab.win32.enu.ContsantsMessages;
+import fxlab.win32.enu.ConstantsMessages;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -53,6 +57,8 @@ public class FXMLLabController implements Initializable {
     private Button btn_clear;
     @FXML
     private Button btn_export;
+    @FXML
+    private Button btn_openWindowProperties;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -169,7 +175,7 @@ public class FXMLLabController implements Initializable {
         try {
             // Register message for know the .Name property of the window Handler pass in parameter
             msg= User32.INSTANCE_API.
-                RegisterWindowMessage(ContsantsMessages.DOT_NET_GET_CONTROL_NAME.
+                RegisterWindowMessage(ConstantsMessages.DOT_NET_GET_CONTROL_NAME.
                         toString());
         
             // create a process with shared memory.
@@ -237,6 +243,12 @@ public class FXMLLabController implements Initializable {
                     char[] buffer= new char[1024];
                     String nameControl= null;
                     
+                    User32.INSTANCE_API.RealGetWindowClass(hActive, buffer, buffer.length);
+                    nameControl= Native.toString(buffer);
+                    
+                    this.txta_log.appendText(String.format("Parent class name: %s%n", 
+                            nameControl));
+                    
                     if (User32.INSTANCE_API.IsWindowVisible(hwnd)) {
                         // get the name of the class of Control child
                         User32.INSTANCE_API.GetClassName(hwnd, buffer, buffer.length);
@@ -289,6 +301,25 @@ public class FXMLLabController implements Initializable {
                                     selected.getPath()), ex);
                 }
             }
+        }
+    }
+    
+    @FXML
+    private void handleBtn_openWindowProperties(ActionEvent evt) {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("/fxlab/ui/FXMLWindowProperties.fxml"));
+        Parent root;
+        Stage stage;
+        
+        try {
+            stage= (Stage) this.gpn_formContainer.getScene().getWindow();
+            root = loader.load();
+            Scene scene = new Scene(root);
+            
+            stage.setScene(scene);
+            stage.setTitle("Window Properties");
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLLabController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -5,6 +5,7 @@
  */
 package fxlab;
 
+import fxlab.util.DialogUtil;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +14,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.SwingDispatchService;
 
 /**
  *
@@ -43,5 +47,36 @@ public class FXLab extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
+    @Override
+    public void init() throws Exception {
+        super.init(); 
+        
+        try {
+            Logger logger= Logger.getLogger(GlobalScreen.class.getPackage().getName());
+            logger.setLevel(Level.WARNING);
+            logger.setUseParentHandlers(false);
+            
+            GlobalScreen.registerNativeHook();
+            GlobalScreen.setEventDispatcher(new SwingDispatchService());
+        } catch (NativeHookException ex) {
+            Logger.getLogger(FXLab.class.getName()).log(Level.SEVERE, null, ex);
+            DialogUtil.showException("There was a problem registering the native hook.", 
+                    ex);
+        }
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        
+        try {
+            if (GlobalScreen.isNativeHookRegistered())
+                GlobalScreen.unregisterNativeHook();
+        } catch (NativeHookException ex) {
+            Logger.getLogger(FXLab.class.getName()).log(Level.SEVERE, null, ex);
+            DialogUtil.showException("There was a problem unregistering the native hook.", 
+                    ex);
+        }
+    }
 }
