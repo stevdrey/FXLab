@@ -11,13 +11,17 @@ import com.sun.jna.platform.win32.Kernel32Util;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
-import com.sun.org.apache.bcel.internal.classfile.ConstantClass;
 import fxlab.ui.enu.TypeControl;
+import fxlab.ui.evt.MouseListerImpl;
 import fxlab.win32.Kernel32;
+import fxlab.win32.POINTByValue;
 import fxlab.win32.User32;
-import fxlab.win32.enu.ContsantsMessages;
+import fxlab.win32.enu.ConstantsMessages;
 import java.net.URL;
+import java.util.EventListener;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,6 +32,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.mouse.NativeMouseListener;
 
 /**
  * FXML Controller class
@@ -37,6 +44,8 @@ import javafx.scene.layout.GridPane;
 public class FXMLWindowPropertiesController implements Initializable {
     private User32 user32;
     private Kernel32 kernel32;
+    private ObservableList<EventListener> eventsList;
+    private AtomicBoolean isRecord;
     
     @FXML
     private GridPane gpn_formContainer;
@@ -73,8 +82,10 @@ public class FXMLWindowPropertiesController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         this.user32= User32.INSTANCE_API;
         this.kernel32= Kernel32.INSTANCE_API;
+        this.eventsList= FXCollections.observableArrayList();
+        this.isRecord= new AtomicBoolean(false);
         
-        this.cmb_application.getItems().setAll(getListOfApps());
+        this.cmb_application.setItems(getListOfApps());
     }    
     
     // section of private methods
@@ -136,7 +147,7 @@ public class FXMLWindowPropertiesController implements Initializable {
         String nameControl= "";
         
         if (handler != null) {
-            user32.GetClassName(handler, buffer, buffer.length);
+            user32.RealGetWindowClass(handler, buffer, buffer.length);
             nameControl= Native.toString(buffer);
         }
         
@@ -204,7 +215,7 @@ public class FXMLWindowPropertiesController implements Initializable {
         
         try {
             // Register message for know the .Name property of the window Handler pass in parameter
-            msg= registerMessage(ContsantsMessages.DOT_NET_GET_CONTROL_NAME.toString());
+            msg= registerMessage(ConstantsMessages.DOT_NET_GET_CONTROL_NAME.toString());
         
             // create a process with shared memory.
             processHandle= openProcessShared(pid);
@@ -336,7 +347,12 @@ public class FXMLWindowPropertiesController implements Initializable {
                     break;
             }
             
-            user32.SendMessage(hwnd, message, buffer.length, buffer);
+            if (type == TypeControl.COMBO_BOX || type == TypeControl.LIST_BOX)
+                user32.SendMessage(hwnd, message, getSelectedIndex(hwnd, type), 0);
+            
+            else
+                user32.SendMessage(hwnd, message, buffer.length, buffer);
+            
             text= Native.toString(buffer);
         }
         
@@ -379,21 +395,148 @@ public class FXMLWindowPropertiesController implements Initializable {
                     break;
             }
             
-            length= user32.SendMessage(hwnd, message, 0, 0);
+            length= user32.SendMessage(hwnd, message, 0, 0) + 1;
         }
         
         return length;
+    }
+    
+    private int getSelectedIndex(WinDef.HWND hwnd, TypeControl type) {
+        int index= 0;
+        int message= 0;
+        
+        switch (type) {
+            case COMBO_BOX:
+                message= User32.CB_GETCURSEL;
+                
+                break;
+        }
+        
+        if (hwnd != null)
+            index= user32.SendMessage(hwnd, message, 0, 0);
+        
+        System.out.println(String.format("Index selected: %d", index));
+        
+        return index;
+    }
+    
+    private void registerListeners() {
+        if (this.eventsList != null && this.eventsList.size() > 0)
+            this.eventsList.forEach(evt -> {
+                if (evt instanceof MouseListerImpl)
+                    GlobalScreen.addNativeMouseListener((NativeMouseListener) evt);
+            });
+    }
+    
+    private void removeListerners() {
+        if (this.eventsList != null && this.eventsList.size() > 0)
+            this.eventsList.forEach(evt -> {
+                if (evt instanceof MouseListerImpl)
+                    GlobalScreen.removeNativeMouseListener((NativeMouseListener) evt);
+            });
+    }
+    
+    private TypeControl getTypeOfControl(WinDef.HWND hwnd) {
+        TypeControl type= null;
+        String className= getClassName(hwnd);
+        
+        if (!className.isEmpty()) {
+            className= className.toLowerCase();
+            
+            if (className.contains("static"))
+                type= TypeControl.LABLE;
+            
+            else if (className.contains("edit"))
+                type= TypeControl.TEXT_BOX;
+            
+            else if (className.contains("button"))
+                type= TypeControl.BUTTON;
+            
+            else if (className.contains("combobox"))
+                type= TypeControl.COMBO_BOX;
+            
+            else if (className.contains("listbox"))
+                type= TypeControl.LIST_BOX;
+        }
+        
+        return type;
+    }
+    
+    private MouseListerImpl createMouseLister() {
+        return new MouseListerImpl((evt) -> {
+            Runnable r= () -> {
+                if (!this.cmb_application.getSelectionModel().isEmpty() && this.isRecord.get()) {
+                    WinDef.HWND application= getWindowHandler(this.cmb_application.
+                        getSelectionModel().getSelectedItem());
+                    
+                    WinDef.HWND currentControl= user32.
+                            WindowFromPoint(new POINTByValue(evt.getX(), evt.getY()));
+                    
+                    this.clearControls(false);
+                    
+                    if (currentControl != null) {
+                        TypeControl type= getTypeOfControl(currentControl);
+                        
+                        if (type != null) {
+                            this.txt_className.setText(getClassName(currentControl));
+                            this.txt_id.setText(getNameProperty(currentControl, 
+                                    getProcessID(application)));
+
+                            switch (type) {
+                                case BUTTON:
+                                case LABLE:
+                                    this.txt_caption.setText(getText(currentControl, type));
+
+                                    break;
+
+                                default:
+                                    this.txt_text.setText(getText(currentControl, type));
+
+                                    break;
+                            }
+                        }
+                    }
+                } else 
+                    ;
+            };
+            
+            if (!Platform.isFxApplicationThread())
+                Platform.runLater(r);
+            
+            else
+                r.run();
+        });
     }
     
     // section of event handlers
     
     @FXML
     private void handleBtn_updateAction(ActionEvent evt) {
-        this.cmb_application.getItems().setAll(getListOfApps());
+        this.cmb_application.setItems(getListOfApps());
     }
     
     @FXML
     private void handleBtn_clear(ActionEvent evt) {
         this.clearControls(true);
+    }
+    
+    @FXML
+    private void handlerBtn_record(ActionEvent evt) {
+        Stage stage= null;
+        
+        this.isRecord.set(true);
+        this.eventsList.add(this.createMouseLister());
+        this.registerListeners();
+        
+        stage= (Stage) this.gpn_formContainer.getScene().getWindow();
+        
+        if (stage != null)
+            stage.setIconified(true);
+    }
+    
+    @FXML
+    private void handleBtn_cancel(ActionEvent evt) {
+        this.isRecord.set(false);
+        this.removeListerners();
     }
 }
