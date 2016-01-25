@@ -38,7 +38,7 @@
       <ComboBox fx:id="cmb_application" layoutX="192.0" layoutY="27.0" prefHeight="25.0" prefWidth="290.0" />
       <Button fx:id="btn_record" layoutX="14.0" layoutY="287.0" onAction="#handlerBtn_record" prefHeight="42.0" prefWidth="90.0" text="_Record" />
       <Button fx:id="btn_clear" layoutX="119.0" layoutY="287.0" onAction="#handleBtn_clear" prefHeight="42.0" prefWidth="90.0" text="_Clear" />
-      <Button fx:id="btn_cancel" layoutX="222.0" layoutY="287.0" prefHeight="42.0" prefWidth="90.0" text="C_ancel" />
+      <Button fx:id="btn_cancel" layoutX="222.0" layoutY="287.0" onAction="#handleBtn_cancel" prefHeight="42.0" prefWidth="90.0" text="C_ancel" />
       <Button fx:id="btn_update" layoutX="324.0" layoutY="287.0" onAction="#handleBtn_updateAction" prefHeight="42.0" prefWidth="90.0" text="_Update" />
    </children>
 </AnchorPane>

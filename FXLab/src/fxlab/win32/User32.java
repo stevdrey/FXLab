@@ -6,9 +6,11 @@
 package fxlab.win32;
 
 import com.sun.jna.Native;
-import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.win32.W32APIOptions;
+import fxlab.win32.enu.AncestorConstants;
+import fxlab.win32.enu.EventConstants;
+import fxlab.win32.enu.WinEventConstants;
 
 /**
  * This Interface handles all the native call of methods in User32.h of Win32Api
@@ -40,25 +42,6 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      * Constant for gets a string from a list box.
      */
     final int LB_GETTEXT = 0x0189;
-    
-    /**
-     * Constant for gets a length of string in combo-box
-     */
-    final int CB_GETLBTEXTLEN= 0x0149;
-    
-    /**
-     * Constant for gets a string from a combo-box
-     */
-    final int CB_GETLBTEXT= 0x0148;
-    
-    /**
-     * Constant for gets a selected string in combo-box
-     */
-    final int CB_SELECTSTRING= 0x014D;
-    
-    final int CB_GETITEMDATA= 0x0150;
-    
-    final int CB_GETCURSEL= 0x0147;
     
     /**
      * Does not skip any child windows
@@ -264,6 +247,139 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      *      A handle to the window that contains the given physical point. If no window exists at the point, this value is NULL.
      */
     HWND WindowFromPhysicalPoint(POINTByValue point);
+    
+    /**
+     * Sets an event hook function for a range of events.
+     * 
+     * This function allows clients to specify which processes and threads they are interested in.
+     * If the idProcess parameter is nonzero and idThread is zero, the hook function receives the specified events from all threads in that process. 
+     * If the idProcess parameter is zero and idThread is nonzero, the hook function receives the specified events only from the thread specified by idThread. 
+     * If both are zero, the hook function receives the specified events from all threads and processes.
+     * 
+     * Clients can call SetWinEventHook multiple times if they want to register additional hook functions or listen for additional events.
+     * The client thread that calls SetWinEventHook must have a message loop in order to receive events.
+     * 
+     * @param eventMin
+     *          Specifies the event constant for the lowest event value in the range of events ({@link EventConstants}) that are handled by the hook function. 
+     *          This parameter can be set to EVENT_MIN to indicate the lowest possible event value.
+     * 
+     * @param eventMax
+     *          Specifies the event constant for the lowest event value in the range of events ({@link EventConstants}) that are handled by the hook function. 
+     *          This parameter can be set to EVENT_MAX to indicate the highest possible event value.
+     * 
+     * @param hmodWinEventProc
+     *          Handle to the DLL that contains the hook function at lpfnWinEventProc, 
+     *          if the WINEVENT_INCONTEXT (see {@link WinEventConstants}) flag is specified in the dwFlags parameter. 
+     *          If the hook function is not located in a DLL, 
+     *          or if the WINEVENT_OUTOFCONTEXT (see {@link WinEventConstants}) flag is specified, this parameter is NULL.
+     * 
+     * @param lpfnWinEventProc
+     *          Pointer to the event hook function. 
+     *          For more information about this function, see {@link WinEventProc.}
+     * 
+     * @param idProcess
+     *          Specifies the ID of the process from which the hook function receives events. 
+     *          Specify zero (0) to receive events from all processes on the current desktop.
+     * 
+     * @param idThred
+     *          Specifies the ID of the thread from which the hook function receives events. 
+     *          If this parameter is zero, the hook function is associated with all existing threads on the current desktop.
+     * 
+     * @param dwflags
+     *          Flag values that specify the location of the hook function and of the events to be skipped
+     *          see {@link WinEventConstants}
+     * 
+     * @return 
+     *      If successful, returns an {@code HANDLE} value that identifies this event hook instance. 
+     *      Applications save this return value to use it with the UnhookWinEvent function.
+     *      If unsuccessful, returns zero.
+     */
+    HANDLE SetWinEventHook(int eventMin, int eventMax, HMODULE hmodWinEventProc, WinEventProc lpfnWinEventProc, 
+            int idProcess, int idThred, int dwflags);
+    
+    /**
+     * Removes an event hook function created by a previous call to {@link SetWinEventHook}.
+     * 
+     * @param hWinEventHook
+     *          Handle to the event hook returned in the previous call to {@link SetWinEventHook}.
+     * 
+     * @return 
+     *      If successful, returns TRUE; otherwise, returns FALSE.
+     */
+    boolean UnhookWinEvent(HANDLE hWinEventHook);
+    
+    /**
+     * Determines whether a window is a child window or descendant window of a specified parent window. 
+     * A child window is the direct descendant of a specified parent window if that parent window is in the chain of parent windows; 
+     * the chain of parent windows leads from the original overlapped or pop-up window to the child window.
+     * 
+     * @param hWndParent
+     *          A handle to the parent window.
+     * 
+     * @param hWnd
+     *          A handle to the window to be tested.
+     * 
+     * @return 
+     *      If the window is a child or descendant window of the specified parent window, the return value is nonzero.
+     *      If the window is not a child or descendant window of the specified parent window, the return value is zero
+     */
+    boolean IsChild(HWND hWndParent, HWND hWnd);
+    
+    /**
+     * Retrieves the handle to the ancestor of the specified window.
+     * 
+     * @param hwnd
+     *          A handle to the window whose ancestor is to be retrieved. 
+     *          If this parameter is the desktop window, the function returns NULL.
+     * 
+     * @param gaFlags
+     *          The ancestor to be retrieved. This parameter can be one of the {@link AncestorConstants} values.
+     * 
+     * @return 
+     *      The return value is the handle to the ancestor window.
+     */
+    HWND GetAncestor(HWND hwnd, int gaFlags);
+    
+    /**
+     * Retrieves a handle to the specified window's parent or owner.
+     * To retrieve a handle to a specified ancestor, use the {@link GetAncestor} function.
+     * 
+     * @param hwnd
+     *          A handle to the window whose parent window handle is to be retrieved.
+     * 
+     * @return 
+     *      If the window is a child window, the return value is a handle to the parent window. 
+     *      If the window is a top-level window with the WS_POPUP style, the return value is a handle to the owner window.
+     * 
+     *      If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+     */
+    HWND GetParent(HWND hwnd);
+    
+    /**
+     * Retrieves a handle to the desktop window. 
+     * The desktop window covers the entire screen. 
+     * The desktop window is the area on top of which other windows are painted.
+     * 
+     * @return 
+     *      The return value is a handle to the desktop window
+     */
+    HWND GetDesktopWindow();
+    
+    /**
+     * Retrieves a handle to a window that has the specified relationship (Z-Order or owner) to the specified window.
+     * 
+     * @param hWnd
+     *          A handle to a window. The window handle retrieved is relative to this window, based on the value of the uCmd parameter.
+     * 
+     * @param uCmd
+     *          The relationship between the specified window and the window whose handle is to be retrieved. 
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a window handle. 
+     *      If no window exists with the specified relationship to the specified window, the return value is NULL. 
+     *      To get extended error information, call GetLastError.
+     */
+    HWND GetWindow(HWND hWnd, int uCmd);
     
     /**
      * Enumerates all entries in the property list of a window by passing them, one by one, to the specified callback function. 
