@@ -21,3 +21,4 @@ Lab to UI Atomatization in WinForms
 **Notes:**
   1. If your Architecture is x64 you must download JDK for architecture x64, because JVM not responds well in compatibility mode.
   2. JNA library has tow .jars: jna-*.jar and jna-platform-*.jar; you need to download both.
+  3. You must run the IDE as Administrator or execute .jar solution as Administrator, becouese you need acces to shared memory.
