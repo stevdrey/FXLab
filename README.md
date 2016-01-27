@@ -12,11 +12,10 @@ Lab to UI Atomatization in WinForms
       1. One Label and Combo-Box for user can select the target application: **Done**
       2. One Label and Textbox for Class Name of the Window (Control) select by User: **Done**
       3. One Label and TextBox for ID of Window (Control) select by User: **Done**
-      4. One Label and TextBox for Captions of Window (Control) select by User, this filed just fill in case the Window (Control) is
-         a Label (class name: Static): **Done**
+      4. One Label and TextBox for State of Window (Control) it just for the following controls: Check-box, Toogle Buttons, Radio Buttons: *pending by dperez*
       5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box and List-Box: **Done**
       6. One Button for "Record" or Listening click Events of Mouse: **Done**
-      7. One listener for focus lost in Window (Control) was clicked.
+      7. One Tap for Font Properties
 
 **Notes:**
   1. If your Architecture is x64 you must download JDK for architecture x64, because JVM not responds well in compatibility mode.
