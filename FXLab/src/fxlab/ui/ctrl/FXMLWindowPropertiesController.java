@@ -7,21 +7,13 @@ package fxlab.ui.ctrl;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.Kernel32Util;
 import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.platform.win32.WinUser;
-import com.sun.jna.ptr.IntByReference;
 import fxlab.pojo.ControlRecord;
-import fxlab.ui.enu.TypeControl;
 import fxlab.ui.evt.MouseListerImpl;
 import fxlab.util.DialogUtil;
 import fxlab.win32.Kernel32;
-import fxlab.win32.POINTByValue;
 import fxlab.win32.User32;
 import fxlab.win32.WinApiUtil;
-import fxlab.win32.enu.AncestorConstants;
-import fxlab.win32.enu.ConstantsMessages;
 import java.net.URL;
 import java.util.EventListener;
 import java.util.Optional;
@@ -66,10 +58,6 @@ public class FXMLWindowPropertiesController implements Initializable {
     @FXML
     private TextField txt_id;
     @FXML
-    private Label lbl_caption;
-    @FXML
-    private TextField txt_caption;
-    @FXML
     private Label lbl_text;
     @FXML
     private TextField txt_text;
@@ -110,7 +98,6 @@ public class FXMLWindowPropertiesController implements Initializable {
         if (all)
             this.cmb_application.getItems().clear();
         
-        this.txt_caption.clear();
         this.txt_className.clear();
         this.txt_id.clear();
         this.txt_text.clear();
@@ -177,24 +164,21 @@ public class FXMLWindowPropertiesController implements Initializable {
                         Optional<ControlRecord> nControl= Optional.empty();
                         
                         if (record != null) {
-                            if (!(record.isComboBox() && record.isShowListBox())
-                                    && !record.getHandle().equals(hwnd)) {
-                                
-                                nControl= Optional.of(new ControlRecord(application, hwnd));
-                                record.dispose();
-                            } else
-                                nControl= Optional.of(record);
-                            
+                            if (!record.getHandle().equals(hwnd)) {
+                                if (!(record.isComboBox() && record.isShowListBox(hwnd))){
+                                    nControl= Optional.of(new ControlRecord(application, hwnd));
+                                    record.dispose();
+                                }
+                            }
                         } else
                             nControl= Optional.of(new ControlRecord(application, hwnd));
                         
-                        return nControl.get();
+                        return nControl.orElse(record);
                     });
                     
                     this.clearControls(false);
                     
                     if (ctrl != null) {
-                        this.txt_caption.setText(ctrl.getCaption());
                         this.txt_className.setText(ctrl.getClassName());
                         this.txt_id.setText(ctrl.getId());
                         this.txt_text.textProperty().unbind();

@@ -114,4 +114,23 @@ public final class WinApiUtil {
         
         return nameControl;
     }
+    
+    /**
+     * This method call the WinApi 32 to request the class name of this Window or Control.
+     * 
+     * @param hwnd
+     * @return 
+     *      Return the class name of this Window or Control.
+     */
+    public static String getClassName(WinDef.HWND hwnd) {
+        char[] buffer= new char[1024];
+        String nameControl= "";
+        
+        if (hwnd != null) {
+            User32.INSTANCE_API.GetClassName(hwnd, buffer, buffer.length);
+            nameControl= Native.toString(buffer);
+        }
+        
+        return nameControl;
+    }
 }

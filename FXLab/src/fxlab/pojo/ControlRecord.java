@@ -11,6 +11,7 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
 import fxlab.ui.enu.TypeControl;
+import fxlab.win32.COMBOBOXINFOByReference;
 import fxlab.win32.Kernel32;
 import fxlab.win32.User32;
 import fxlab.win32.WinApiUtil;
@@ -18,6 +19,7 @@ import fxlab.win32.WinEventProc;
 import fxlab.win32.enu.ComboBoxConstants;
 import fxlab.win32.enu.ConstantsMessages;
 import fxlab.win32.enu.EventConstants;
+import fxlab.win32.enu.ObjectStateConstants;
 import fxlab.win32.enu.WinEventConstants;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
@@ -68,13 +70,6 @@ public class ControlRecord {
         return this.className.getValueSafe();
     }
     
-    public String getCaption() {
-        if (this.caption == null)
-            this.caption= new SimpleStringProperty(this, "caption", getText(getTypeOfControl()));
-                
-        return this.caption.getValueSafe();
-    }
-    
     public String getText() {
         this.updateText();
         
@@ -108,7 +103,7 @@ public class ControlRecord {
     
     public StringProperty textProperty() {
         if (this.text == null)
-            this.text= new SimpleStringProperty(this, "text", "");
+            this.text= new SimpleStringProperty(this, "text", getText(getTypeOfControl()));
         
         return this.text;
     }
@@ -119,15 +114,18 @@ public class ControlRecord {
         return type != null && type == TypeControl.COMBO_BOX;
     }
     
-    public boolean isShowListBox() {
-        int result= user32.SendMessage(this.handle, 
-                ComboBoxConstants.CB_GETDROPPEDSTATE.getValue(), 0, 0);
+    public boolean isShowListBox(WinDef.HWND hwnd) {
+        COMBOBOXINFOByReference cbi= new COMBOBOXINFOByReference();
         
-        if (result == 0)
-            System.err.println(String.format("Message error: %s", 
-                    Kernel32Util.getLastErrorMessage()));
+        user32.SendMessage(this.handle, 
+                ComboBoxConstants.CB_GETCOMBOBOXINFO.getValue(), 0, cbi);
         
-        return result != 0;
+        if (cbi.hwndList != null)
+            return  this.user32.IsWindowVisible(cbi.hwndList) || 
+                    (ObjectStateConstants.fromValue(cbi.stateButton) == ObjectStateConstants.STATE_SYSTEM_PRESSED) || 
+                    cbi.hwndList.equals(hwnd);
+        
+        return false;
     }
 
     @Override
@@ -177,7 +175,7 @@ public class ControlRecord {
         TypeControl type= null;
         String className= this.getClassName();
         
-        if (!className.isEmpty()) {
+            if (!className.isEmpty()) {
             className= className.toLowerCase();
             
             if (className.contains("static"))
@@ -412,23 +410,13 @@ public class ControlRecord {
         TypeControl type= this.getTypeOfControl();
         
         if (type != null) {
-            if (type == TypeControl.LIST_BOX || type == TypeControl.COMBO_BOX)
-                this.eventListeners.
+            this.eventListeners.
                             add(this.user32.SetWinEventHook(EventConstants.EVENT_OBJECT_VALUECHANGE.getValue(), 
                                     EventConstants.EVENT_OBJECT_VALUECHANGE.getValue(), 
                                     null, this.createChangeEvent(), 
                                     WinApiUtil.getProcessID(this.parent).getValue(), 0, 
                                     WinEventConstants.WINEVENT_OUTOFCONTEXT.getValue())
                             );
-            
-            if (type != TypeControl.BUTTON)
-                this.eventListeners.add(
-                        this.user32.SetWinEventHook(EventConstants.EVENT_SYSTEM_FOREGROUND.getValue(), 
-                                EventConstants.EVENT_SYSTEM_FOREGROUND.getValue(), 
-                                null, this.createLostFocusEvent(), 
-                                WinApiUtil.getProcessID(this.parent).getValue(), 0, 
-                                WinEventConstants.WINEVENT_OUTOFCONTEXT.getValue())
-                );
         }
     }
     

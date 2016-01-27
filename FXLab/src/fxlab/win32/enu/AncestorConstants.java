@@ -34,5 +34,4 @@ public enum AncestorConstants {
     public int getValue() {
         return value;
     }
-    
 }

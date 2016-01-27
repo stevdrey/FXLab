@@ -40,7 +40,12 @@ public enum ComboBoxConstants {
     /**
      * Determines whether the list box of a combo box is dropped down.
      */
-    CB_GETDROPPEDSTATE(0x0157);
+    CB_GETDROPPEDSTATE(0x0157),
+    
+    /**
+     * Gets information about the specified combo box.
+     */
+    CB_GETCOMBOBOXINFO(0x0164);
     
     private final int value;
 

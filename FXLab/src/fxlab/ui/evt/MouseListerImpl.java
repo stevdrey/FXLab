@@ -13,12 +13,12 @@ import org.jnativehook.mouse.NativeMouseListener;
  * @author srey
  */
 public class MouseListerImpl implements NativeMouseListener{
-    private EventHandler<NativeMouseEvent> release;
+    private EventHandler<NativeMouseEvent> click;
 
-    public MouseListerImpl(EventHandler<NativeMouseEvent> release) {
+    public MouseListerImpl(EventHandler<NativeMouseEvent> click) {
         super();
         
-        this.setOnRelease(release);
+        this.setOnClick(click);
     }
 
     public MouseListerImpl() {
@@ -27,6 +27,8 @@ public class MouseListerImpl implements NativeMouseListener{
     
     @Override
     public void nativeMouseClicked(NativeMouseEvent e) {
+        if (this.click != null)
+            this.click.handle(e);
     }
 
     @Override
@@ -36,11 +38,9 @@ public class MouseListerImpl implements NativeMouseListener{
 
     @Override
     public void nativeMouseReleased(NativeMouseEvent e) {
-        if (this.release != null)
-            this.release.handle(e);
     }
     
-    public final void setOnRelease(EventHandler<NativeMouseEvent> release) {
-        this.release= release;
+    public final void setOnClick(EventHandler<NativeMouseEvent> click) {
+        this.click= click;
     }
 }

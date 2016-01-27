@@ -21,17 +21,14 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label fx:id="lbl_className" text="Class Name:" />
             <TextField fx:id="txt_className" editable="false" GridPane.columnIndex="1" />
             <Label fx:id="lbl_id" text="ID:" GridPane.rowIndex="1" />
             <TextField fx:id="txt_id" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="lbl_caption" text="Caption:" GridPane.rowIndex="2" />
-            <TextField fx:id="txt_caption" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="lbl_text" text="Text:" GridPane.rowIndex="3" />
-            <TextField fx:id="txt_text" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label fx:id="lbl_text" text="Text:" GridPane.rowIndex="2" />
+            <TextField fx:id="txt_text" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
       <Label fx:id="lbl_application" layoutX="119.0" layoutY="31.0" text="Application:" />
