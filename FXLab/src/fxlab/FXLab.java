@@ -27,7 +27,7 @@ public class FXLab extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader= new FXMLLoader(getClass().getResource("/fxlab/ui/FXMLLab.fxml"));
+            FXMLLoader loader= new FXMLLoader(getClass().getResource("/fxlab/ui/FXMLWindowProperties.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             
