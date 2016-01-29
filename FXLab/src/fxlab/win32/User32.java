@@ -9,6 +9,7 @@ import com.sun.jna.Native;
 import com.sun.jna.WString;
 import com.sun.jna.win32.W32APIOptions;
 import fxlab.win32.enu.AncestorConstants;
+import fxlab.win32.enu.DeviceContextConstants;
 import fxlab.win32.enu.EventConstants;
 import fxlab.win32.enu.WinEventConstants;
 
@@ -22,16 +23,6 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      * Singleton instance of this Interface
      */
     User32 INSTANCE_API= (User32) Native.loadLibrary("user32", User32.class, W32APIOptions.DEFAULT_OPTIONS);
-    
-    /**
-     * Constant for determines the length, in characters, of the text associated with a window.
-     */
-    final int WM_GETTEXTLENGTH= 0x000E;
-    
-    /**
-     * Constant for copy the text that corresponds to a window into a buffer provided by the caller.
-     */
-    final int WM_GETTEXT= 0x000D;
     
     /**
      * Constant for gets the length of a string in a list box.
@@ -184,7 +175,7 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      * @return 
      *      The return value specifies the result of the message processing; it depends on the message sent.
      */    
-    int SendMessage(HWND hWnd, int Msg, int wParam, int lParam);
+    LRESULT SendMessage(HWND hWnd, int Msg, int wParam, int lParam);
     
     /**
      * Sends the specified message to a window or windows. The SendMessage function calls the window 
@@ -407,6 +398,88 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
      *      To get extended error information, call GetLastError.
      */
     HWND GetWindow(HWND hWnd, int uCmd);
+    
+    /**
+     * The GetWindowDC function retrieves the device context (DC) for the entire window, 
+     * including title bar, menus, and scroll bars. A window device context permits painting anywhere in a window, 
+     * because the origin of the device context is the upper-left corner of the window instead of the client area.
+     * 
+     * GetWindowDC assigns default attributes to the window device context each time 
+     * it retrieves the device context. Previous attributes are lost.
+     * 
+     * @param hWnd
+     *          A handle to the window with a device context that is to be retrieved. 
+     *          If this value is NULL, GetWindowDC retrieves the device context for the entire screen.
+     * 
+     *          If this parameter is NULL, GetWindowDC retrieves the device context for the primary display monitor. 
+     *          To get the device context for other display monitors, use the EnumDisplayMonitors and CreateDC functions.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a handle to a device context for the specified window.
+     *      If the function fails, the return value is NULL, indicating an error or an invalid hWnd parameter.
+     */
+    HDC GetWindowDC(HWND hWnd);
+    
+    /**
+     * The GetWindowRgn function obtains a copy of the window region of a window. 
+     * The window region of a window is set by calling the SetWindowRgn function. 
+     * The window region determines the area within the window where the system permits drawing. 
+     * The system does not display any portion of a window that lies outside of the window region
+     * 
+     * @param hWnd
+     *          Handle to the window whose window region is to be obtained.
+     * 
+     * @param hRgn
+     *          Handle to the region which will be modified to represent the window region.
+     * 
+     * @return 
+     *      The return value specifies the type of the region that the function obtains. 
+     */
+    int GetWindowRgn(HWND hWnd, HRGN hRgn);
+    
+    /**
+     * The GetDCEx function retrieves a handle to a device context (DC) for the client area of 
+     * a specified window or for the entire screen. 
+     * You can use the returned handle in subsequent GDI functions to draw in the DC. 
+     * The device context is an opaque data structure, whose values are used internally by GDI.
+     *
+     * This function is an extension to the GetDC function, which gives an application 
+     * more control over how and whether clipping occurs in the client area.
+     * 
+     * @param hWnd
+     *          A handle to the window whose DC is to be retrieved. 
+     *          If this value is NULL, GetDCEx retrieves the DC for the entire screen.
+     * 
+     * @param hrgnClip
+     *          A clipping region that may be combined with the visible region of the DC. 
+     *          If the value of flags is DCX_INTERSECTRGN or DCX_EXCLUDERGN, 
+     *          then the operating system assumes ownership of the region and will automatically 
+     *          delete it when it is no longer needed. 
+     *          In this case, the application should not use or delete the region 
+     *          after a successful call to GetDCEx.
+     * 
+     * @param flags
+     *          Specifies how the DC is created. 
+     *          This parameter can be one or more of the {@link DeviceContextConstants} values.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is the handle to the DC for the specified window.
+     *      If the function fails, the return value is NULL. An invalid value for the hWnd parameter will cause the function to fail.
+     */
+    HDC GetDCEx(HWND hWnd, HRGN hrgnClip, int flags);
+    
+    /**
+     * The WindowFromDC function returns a handle to the window associated with the specified display device context (DC). 
+     * Output functions that use the specified device context draw into this window.
+     * 
+     * @param hdc
+     *          Handle to the device context from which a handle to the associated window is to be retrieved.
+     * 
+     * @return 
+     *      The return value is a handle to the window associated with the specified DC. 
+     *      If no window is associated with the specified DC, the return value is NULL.
+     */
+    HWND WindowFromDC(HDC hdc);
     
     /**
      * Enumerates all entries in the property list of a window by passing them, one by one, to the specified callback function. 

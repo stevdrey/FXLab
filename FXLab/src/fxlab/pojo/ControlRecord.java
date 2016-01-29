@@ -6,6 +6,7 @@
 package fxlab.pojo;
 
 import com.sun.jna.Native;
+import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32Util;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
@@ -13,6 +14,7 @@ import com.sun.jna.ptr.IntByReference;
 import fxlab.ui.enu.TypeControl;
 import fxlab.win32.COMBOBOXINFOByReference;
 import fxlab.win32.Kernel32;
+import fxlab.win32.LOGFONT;
 import fxlab.win32.User32;
 import fxlab.win32.WinApiUtil;
 import fxlab.win32.WinEventProc;
@@ -21,7 +23,10 @@ import fxlab.win32.enu.ConstantsMessages;
 import fxlab.win32.enu.EventConstants;
 import fxlab.win32.enu.ObjectStateConstants;
 import fxlab.win32.enu.WinEventConstants;
+import fxlab.win32.enu.WindowMessagesConstants;
 import java.util.Objects;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -41,9 +46,11 @@ public class ControlRecord {
     private Kernel32 kernel32= null;
     
     private StringProperty className= null;
-    private StringProperty caption= null;
+    private StringProperty realClassName= null;
     private StringProperty text= null;
     private StringProperty id= null;
+    
+    private ObjectProperty<FontControl> fontControl= null;
 
     public ControlRecord(WinDef.HWND parent, WinDef.HWND handle) {
         super();
@@ -65,9 +72,18 @@ public class ControlRecord {
      */
     public String getClassName() {
         if (this.className == null) 
-            this.className= new SimpleStringProperty(this, "className", getRealClassName());
+            this.className= new SimpleStringProperty(this, "className", 
+                    WinApiUtil.getClassName(this.handle));
                 
         return this.className.getValueSafe();
+    }
+    
+    public String getRealClassName() {
+        if (this.realClassName == null)
+            this.realClassName= new SimpleStringProperty(this, "realClassName", 
+                    WinApiUtil.getRealClassName(this.handle));
+        
+        return this.realClassName.getValueSafe();
     }
     
     public String getText() {
@@ -79,13 +95,33 @@ public class ControlRecord {
     public String getId() {
         if (this.id == null)
             this.id= new SimpleStringProperty(this, "id", 
-                    getNameProperty(WinApiUtil.getProcessID(this.parent)));
+                    WinApiUtil.getNameProperty(this.handle, WinApiUtil.getProcessID(this.parent)));
         
         return this.id.getValueSafe();
     }
 
     public WinDef.HWND getHandle() {
         return handle;
+    }
+    
+    public FontControl getFontControl() {
+        if (this.fontControl == null) {
+            FontControl fc= null;
+            LOGFONT lfont= WinApiUtil.getFontWindow(this.handle);
+            
+            if (lfont != null)
+                fc= new FontControl(Native.toString(lfont.lfFaceName), lfont.lfHeight, 
+                        lfont.lfWidth, lfont.lfOrientation, lfont.lfWeight, 
+                        lfont.lfItalic.byteValue() != 0, lfont.lfStrikeOut.byteValue() != 0, 
+                        lfont.lfUnderline.byteValue() != 0);
+            
+            else
+                fc= new FontControl();
+            
+            this.fontControl= new SimpleObjectProperty<>(this, "fontControl", fc);
+        }
+        
+        return this.fontControl.getValue();
     }
     
     public void dispose() {
@@ -142,28 +178,12 @@ public class ControlRecord {
         hash = 73 * hash + Objects.hashCode(this.handle);
         hash = 73 * hash + Objects.hashCode(this.parent);
         hash = 73 * hash + Objects.hashCode(this.id);
+        hash = 73 * hash + Objects.hashCode(this.className);
+        hash = 73 * hash + Objects.hashCode(this.realClassName);
         return hash;
     }
     
     // section of private method
-    
-    /**
-     * This method call the WinApi 32 to request the class name of this Window or Control.
-     * 
-     * @return 
-     *      Return the class name of this Window or Control.
-     */
-    private String getRealClassName() {
-        char[] buffer= new char[1024];
-        String nameControl= "";
-        
-        if (this.handle != null) {
-            this.user32.RealGetWindowClass(this.handle, buffer, buffer.length);
-            nameControl= Native.toString(buffer);
-        }
-        
-        return nameControl;
-    }
     
     /**
      * This method gets the type of control base on its class name.
@@ -224,12 +244,12 @@ public class ControlRecord {
                     break;
 
                 default:
-                    message= User32.WM_GETTEXTLENGTH;
+                    message= WindowMessagesConstants.WM_GETTEXTLENGTH.getValue();
 
                     break;
             }
             
-            length= user32.SendMessage(this.handle, message, 0, 0) + 1;
+            length= user32.SendMessage(this.handle, message, 0, 0).intValue() + 1;
         }
         
         return length;
@@ -265,7 +285,7 @@ public class ControlRecord {
                     break;
                     
                 default:
-                    message= User32.WM_GETTEXT;
+                    message= WindowMessagesConstants.WM_GETTEXT.getValue();
                     
                     break;
             }
@@ -314,85 +334,10 @@ public class ControlRecord {
             }
 
             if (this.handle != null)
-                index= user32.SendMessage(this.handle, message, 0, 0);
+                index= user32.SendMessage(this.handle, message, 0, 0).intValue();
         }
         
         return index;
-    }
-    
-    /**
-     * This method return the ID of an specific window or control
-     * 
-     * @param pid
-     *          The number of the Process ID is run the target application.
-     * 
-     * @return 
-     *      This method return the ID ({@code .Name} property in WinForms) of an 
-     *      specific window or control
-     */
-    private String getNameProperty(IntByReference pid) {
-        String result= "";
-        
-        int size= 65535; //size of memory to be allocated
-        int retLength= 0;
-        int msg= 0;
-        
-        boolean retVal= false;
-        
-        char[] nameProperty= new char[size];
-        
-        WinNT.HANDLE bufferMen= null;
-        WinNT.HANDLEByReference written= null;
-        WinNT.HANDLE processHandle= null;
-        
-        try {
-            // Register message for know the .Name property of the window Handler pass in parameter
-            msg= WinApiUtil.registerMessage(ConstantsMessages.DOT_NET_GET_CONTROL_NAME.toString());
-        
-            // create a process with shared memory.
-            processHandle= WinApiUtil.openProcessShared(pid);
-
-            if (processHandle != null) {
-                // allocate an space of memory that will contains the result of .Name property
-                bufferMen= WinApiUtil.allocateMemory(processHandle, size + 1);
-
-                if (bufferMen != null) {
-                    // send the message to target application and specific window (Control)
-                    retLength= user32.SendMessage(this.handle, msg, size + 1, bufferMen);
-
-                    // read the shared memory and get the value of .name property.
-                    retVal= kernel32.ReadProcessMemory(processHandle, bufferMen, 
-                            nameProperty, size + 1, written);
-
-                    // if read was successfull then converto to String the value.
-                    if (retVal)
-                        result= Native.toString(nameProperty);
-                    
-                    else
-                        System.err.println(String.format("Error message when try to read process: %s", 
-                                Kernel32Util.getLastErrorMessage()));
-                    
-                } else
-                    System.err.println(String.format("Error message when try to allocate memory: %s", 
-                            Kernel32Util.getLastErrorMessage()));
-                
-            } else
-                System.err.println(String.format("Error message when try to open new process: %s", 
-                        Kernel32Util.getLastErrorMessage()));
-            
-        } finally {
-            if (processHandle != null) {
-                // realese the memory allocate
-                retVal= kernel32.VirtualFreeEx(processHandle, bufferMen, 0, 
-                        Kernel32.MEM_RELEASE);
-            
-                if (!retVal)
-                    System.err.println(String.format("Error message free allocate memory: %s", 
-                            Kernel32Util.getLastErrorMessage()));
-            }
-        }
-        
-        return result;
     }
     
     /**

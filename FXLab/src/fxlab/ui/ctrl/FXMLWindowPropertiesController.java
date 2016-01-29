@@ -27,10 +27,15 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.mouse.NativeMouseListener;
@@ -47,8 +52,6 @@ public class FXMLWindowPropertiesController implements Initializable {
     private AtomicBoolean isRecord;
     private AtomicReference<ControlRecord> currentControl;
     
-    @FXML
-    private GridPane gpn_formContainer;
     @FXML
     private Label lbl_className;
     @FXML
@@ -73,6 +76,54 @@ public class FXMLWindowPropertiesController implements Initializable {
     private Button btn_cancel;    
     @FXML
     private Button btn_update;
+    @FXML
+    private TabPane tpn_windowProperties;
+    @FXML
+    private Tab tap_genarlProperties;
+    @FXML
+    private AnchorPane anpn_generalProperties;
+    @FXML
+    private GridPane gpn_generalProperties;
+    @FXML
+    private Label lbl_realClassName;
+    @FXML
+    private TextField txt_realClassName;
+    @FXML
+    private Tab tap_fontProperties;
+    @FXML
+    private AnchorPane anpn_fontProperties;
+    @FXML
+    private GridPane gpn_fontProperties;
+    @FXML
+    private Label lbl_height;
+    @FXML
+    private Label lbl_width;
+    @FXML
+    private Label lbl_orientation;
+    @FXML
+    private Label lbl_weight;
+    @FXML
+    private Label lbl_style;
+    @FXML
+    private Label lbl_faceNAme;
+    @FXML
+    private TextField txt_fontHeight;
+    @FXML
+    private TextField txt_fontWidth;
+    @FXML
+    private TextField txt_fontOrientation;
+    @FXML
+    private TextField txt_fontWeight;
+    @FXML
+    private TextField txt_faceName;
+    @FXML
+    private Pane pn_fontStyle;
+    @FXML
+    private CheckBox ckb_fontItalic;
+    @FXML
+    private CheckBox ckb_fontUnderline;
+    @FXML
+    private CheckBox ckb_fontStrikeOut;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -101,6 +152,12 @@ public class FXMLWindowPropertiesController implements Initializable {
         this.txt_className.clear();
         this.txt_id.clear();
         this.txt_text.clear();
+        this.txt_faceName.clear();
+        this.txt_fontHeight.clear();
+        this.txt_fontOrientation.clear();
+        this.txt_fontWeight.clear();
+        this.txt_fontWidth.clear();
+        this.txt_realClassName.clear();
     }
     
     /**
@@ -180,9 +237,21 @@ public class FXMLWindowPropertiesController implements Initializable {
                     
                     if (ctrl != null) {
                         this.txt_className.setText(ctrl.getClassName());
+                        this.txt_realClassName.setText(ctrl.getRealClassName());
                         this.txt_id.setText(ctrl.getId());
                         this.txt_text.textProperty().unbind();
                         this.txt_text.textProperty().bind(ctrl.textProperty());
+                        
+                        // section of font properties
+                        this.txt_faceName.setText(ctrl.getFontControl().getFaceName());
+                        this.txt_fontHeight.setText(String.valueOf(ctrl.getFontControl().getHeight()));
+                        this.txt_fontOrientation.setText(String.valueOf(ctrl.getFontControl().getOrientation()));
+                        this.txt_fontWeight.setText(ctrl.getFontControl().getWeigth().name());
+                        this.txt_fontWidth.setText(String.valueOf(ctrl.getFontControl().getWidth()));
+                        
+                        this.ckb_fontItalic.setSelected(ctrl.getFontControl().isItalic());
+                        this.ckb_fontStrikeOut.setSelected(ctrl.getFontControl().isStrikeOut());
+                        this.ckb_fontUnderline.setSelected(ctrl.getFontControl().isUnderline());
                     }
                 } else {
                     DialogUtil.showWarning("Missiging Data", 
@@ -220,7 +289,7 @@ public class FXMLWindowPropertiesController implements Initializable {
         this.eventsList.add(this.createMouseLister());
         this.registerListeners();
         
-        stage= (Stage) this.gpn_formContainer.getScene().getWindow();
+        stage= (Stage) this.gpn_generalProperties.getScene().getWindow();
         
         if (stage != null)
             stage.setIconified(true);

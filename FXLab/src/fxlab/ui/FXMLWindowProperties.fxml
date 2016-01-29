@@ -12,30 +12,87 @@
         <URL value="@/fxlab/resorce/css/fxmllab.css" />
     </stylesheets>
    <children>
-      <GridPane fx:id="gpn_formContainer" layoutX="10.0" layoutY="95.0" prefHeight="160.0" prefWidth="573.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="281.0" minWidth="10.0" prefWidth="170.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="403.0" minWidth="10.0" prefWidth="403.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label fx:id="lbl_className" text="Class Name:" />
-            <TextField fx:id="txt_className" editable="false" GridPane.columnIndex="1" />
-            <Label fx:id="lbl_id" text="ID:" GridPane.rowIndex="1" />
-            <TextField fx:id="txt_id" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="lbl_text" text="Text:" GridPane.rowIndex="2" />
-            <TextField fx:id="txt_text" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-         </children>
-      </GridPane>
-      <Label fx:id="lbl_application" layoutX="119.0" layoutY="31.0" text="Application:" />
-      <ComboBox fx:id="cmb_application" layoutX="192.0" layoutY="27.0" prefHeight="25.0" prefWidth="290.0" />
-      <Button fx:id="btn_record" layoutX="14.0" layoutY="287.0" onAction="#handlerBtn_record" prefHeight="42.0" prefWidth="90.0" text="_Record" />
-      <Button fx:id="btn_clear" layoutX="119.0" layoutY="287.0" onAction="#handleBtn_clear" prefHeight="42.0" prefWidth="90.0" text="_Clear" />
-      <Button fx:id="btn_cancel" layoutX="222.0" layoutY="287.0" onAction="#handleBtn_cancel" prefHeight="42.0" prefWidth="90.0" text="C_ancel" />
-      <Button fx:id="btn_update" layoutX="324.0" layoutY="287.0" onAction="#handleBtn_updateAction" prefHeight="42.0" prefWidth="90.0" text="_Update" />
+      <TabPane fx:id="tpn_windowProperties" layoutY="50.0" prefHeight="243.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab fx:id="tap_genarlProperties" closable="false" text="General Properties">
+               <content>
+                  <AnchorPane fx:id="anpn_generalProperties" prefHeight="214.0" prefWidth="491.0">
+                     <children>
+                        <GridPane fx:id="gpn_generalProperties" layoutX="20.0" layoutY="16.0" prefHeight="189.0" prefWidth="562.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="272.0" minWidth="10.0" prefWidth="119.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="443.0" minWidth="10.0" prefWidth="443.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label fx:id="lbl_className" text="Class Name:" />
+                              <Label fx:id="lbl_realClassName" text="Real Class Name:" GridPane.rowIndex="1" />
+                              <Label fx:id="lbl_id" text="ID:" GridPane.rowIndex="2" />
+                              <Label fx:id="lbl_text" text="Text:" GridPane.rowIndex="3" />
+                              <TextField fx:id="txt_className" editable="false" GridPane.columnIndex="1" />
+                              <TextField fx:id="txt_realClassName" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="txt_id" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="txt_text" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+          <Tab fx:id="tap_fontProperties" closable="false" text="Font Properties">
+               <content>
+                  <AnchorPane fx:id="anpn_fontProperties">
+                     <children>
+                        <GridPane fx:id="gpn_fontProperties" layoutX="27.0" layoutY="11.0" prefHeight="198.0" prefWidth="543.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="292.0" minWidth="10.0" prefWidth="139.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="511.0" minWidth="10.0" prefWidth="461.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label fx:id="lbl_height" text="Height:" />
+                              <Label fx:id="lbl_width" text="Width:" GridPane.rowIndex="1" />
+                              <Label fx:id="lbl_orientation" text="Orientation:" GridPane.rowIndex="2" />
+                              <Label fx:id="lbl_weight" text="Weight:" GridPane.rowIndex="3" />
+                              <Label fx:id="lbl_style" text="Style:" GridPane.rowIndex="4" />
+                              <Label fx:id="lbl_faceNAme" text="Face Name:" GridPane.rowIndex="5" />
+                              <TextField fx:id="txt_fontHeight" editable="false" GridPane.columnIndex="1" />
+                              <TextField fx:id="txt_fontWidth" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="txt_fontOrientation" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="txt_fontWeight" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <TextField fx:id="txt_faceName" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <Pane fx:id="pn_fontStyle" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <children>
+                                    <CheckBox fx:id="ckb_fontItalic" disable="true" layoutY="8.0" mnemonicParsing="false" text="Italic" />
+                                    <CheckBox fx:id="ckb_fontUnderline" disable="true" layoutX="86.0" layoutY="8.0" mnemonicParsing="false" text="Underline" />
+                                    <CheckBox fx:id="ckb_fontStrikeOut" disable="true" layoutX="198.0" layoutY="8.0" mnemonicParsing="false" text="Strike Out" />
+                                 </children>
+                              </Pane>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <Label fx:id="lbl_application" layoutX="119.0" layoutY="18.0" text="Application:" />
+      <ComboBox fx:id="cmb_application" layoutX="192.0" layoutY="14.0" prefHeight="25.0" prefWidth="290.0" />
+      <Button fx:id="btn_record" layoutX="14.0" layoutY="298.0" onAction="#handlerBtn_record" prefHeight="42.0" prefWidth="90.0" text="_Record" />
+      <Button fx:id="btn_clear" layoutX="119.0" layoutY="298.0" onAction="#handleBtn_clear" prefHeight="42.0" prefWidth="90.0" text="_Clear" />
+      <Button fx:id="btn_cancel" layoutX="222.0" layoutY="298.0" onAction="#handleBtn_cancel" prefHeight="42.0" prefWidth="90.0" text="C_ancel" />
+      <Button fx:id="btn_update" layoutX="324.0" layoutY="298.0" onAction="#handleBtn_updateAction" prefHeight="42.0" prefWidth="90.0" text="_Update" />
    </children>
 </AnchorPane>
