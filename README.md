@@ -12,7 +12,7 @@ Lab to UI Atomatization in WinForms
       1. One Label and Combo-Box for user can select the target application: **Done**
       2. One Label and Textbox for Class Name of the Window (Control) select by User: **Done**
       3. One Label and TextBox for ID of Window (Control) select by User: **Done**
-      4. One Label and TextBox for State of Window (Control) it just for the following controls: Check-box, Toogle Buttons, Radio Buttons: *pending by dperez*
+      4. One Label and TextBox for State of Window (Control) it just for the following controls: Check-box, Toogle Buttons, Radio Buttons: *pending*
       5. One Label and TextBox for text of Window (Control) select by User, this apply if Window is a TextBox, Combo-Box and List-Box: **Done**
       6. One Button for "Record" or Listening click Events of Mouse: **Done**
       7. One Tap for Font Properties
