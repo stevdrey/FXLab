@@ -169,4 +169,44 @@ public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
      *      If the function fails, the return value is 0 (zero). To get extended error information, call GetLastError.
      */
     boolean VirtualFreeEx(HANDLE hProcess, HANDLE lpAddress, int dwSize, int  dwFreeType);
+    
+    /**
+     * Retrieves a copy of the character string associated with the specified local atom.
+     * 
+     * @param nAtom
+     *          The local atom that identifies the character string to be retrieved.
+     * 
+     * @param lpBuffer
+     *          The character string.
+     * 
+     * @param sSize
+     *          The size, in characters, of the buffer.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is the length of the string copied to the buffer, 
+     *      in characters, not including the terminating null character.
+     * 
+     *      If the function fails, the return value is zero. To get extended error information, call GetLastError.
+     */
+    int GetAtomName(ATOM nAtom, char[] lpBuffer, int sSize);
+    
+    /**
+     * Retrieves a copy of the character string associated with the specified local atom.
+     * 
+     * @param nAtom
+     *          The local atom that identifies the character string to be retrieved.
+     * 
+     * @param lpBuffer
+     *          The character string.
+     * 
+     * @param sSize
+     *          The size, in characters, of the buffer.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is the length of the string copied to the buffer, 
+     *      in characters, not including the terminating null character.
+     * 
+     *      If the function fails, the return value is zero. To get extended error information, call GetLastError.
+     */
+    int GlobalGetAtomName(ATOM nAtom, char[] lpBuffer, int sSize);
 }

@@ -5,13 +5,19 @@
  */
 package fxlab.win32;
 
+import fxlab.win32.struct.POINTByValue;
+import fxlab.win32.struct.COMBOBOXINFOByReference;
 import com.sun.jna.Native;
 import com.sun.jna.WString;
 import com.sun.jna.win32.W32APIOptions;
+import fxlab.win32.cb.PropEnumProcEx;
+import fxlab.win32.cb.WinEventProc;
 import fxlab.win32.enu.AncestorConstants;
 import fxlab.win32.enu.DeviceContextConstants;
 import fxlab.win32.enu.EventConstants;
+import fxlab.win32.enu.SystemParamInfoConstants;
 import fxlab.win32.enu.WinEventConstants;
+import fxlab.win32.struct.NONCLIENTMETRICS;
 
 /**
  * This Interface handles all the native call of methods in User32.h of Win32Api
@@ -482,6 +488,50 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
     HWND WindowFromDC(HDC hdc);
     
     /**
+     * Retrieves or sets the value of one of the system-wide parameters. 
+     * This function can also update the user profile while setting a parameter.
+     * 
+     * @param uiAction
+     *          The system-wide parameter to be retrieved or set. 
+     *          The possible values are organized in the {@link SystemParamInfoConstants} values
+     * 
+     * @param uiParam
+     *          A parameter whose usage and format depends on the system parameter being queried or set. 
+     *          For more information about system-wide parameters, see the uiAction parameter. 
+     *          If not otherwise indicated, you must specify zero for this parameter.
+     * 
+     * @param pvParam
+     *          A parameter whose usage and format depends on the system parameter being queried or set. 
+     *          For more information about system-wide parameters, see the uiAction parameter. 
+     *          If not otherwise indicated, you must specify NULL for this parameter.
+     * 
+     * @param fWinIni
+     *          If a system parameter is being set, specifies whether the user profile is to be updated, and if so, 
+     *          whether the WM_SETTINGCHANGE message is to be broadcast to all top-level windows to notify them of the change.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a nonzero value.
+     *      If the function fails, the return value is zero. To get extended error information, call GetLastError.
+     */
+    boolean SystemParametersInfo(int uiAction, int uiParam, NONCLIENTMETRICS pvParam, int fWinIni);
+    
+    /**
+     * Retrieves a data handle from the property list of the specified window. 
+     * The character string identifies the handle to be retrieved. 
+     * The string and handle must have been added to the property list by a previous call to the SetProp function.
+     * 
+     * @param hwnd
+     *          A handle to the window whose property list is to be searched.
+     * @param lpString
+     *          An atom that identifies a string. 
+     *          If this parameter is an atom, it must have been created by using the GlobalAddAtom function. 
+     *          The atom, a 16-bit value, must be placed in the low-order word of the lpString parameter; the high-order word must be zero.
+     * 
+     * @return 
+     */
+    HANDLE GetProp(HWND hwnd, String lpString);
+        
+    /**
      * Enumerates all entries in the property list of a window by passing them, one by one, to the specified callback function. 
      * EnumPropsEx continues until the last entry is enumerated or the callback function returns FALSE.
      * 
@@ -502,46 +552,7 @@ public interface User32 extends com.sun.jna.platform.win32.User32{
     
     int EnumProps(HWND hWnd, PropEnumProc lpEnumFunc);
     
-    /**
-     * The PROPENUMPROCEX type defines a pointer to this callback function.
-     * 
-     * The following restrictions apply to this callback function:
-     * 
-     * <ul>
-     *  <li>The callback function must not yield control or do anything that might yield control to other tasks.</li>
-     *  <li>The callback function can call the RemoveProp function. However, RemoveProp can remove only the property passed to the callback function through the callback function's parameters.</li>
-     *  <li>The callback function should not attempt to add properties.</li>
-     * </ul>
-     */
-    public static interface PropEnumProcEx extends StdCallCallback {
-        /**
-         * Application-defined callback function used with the EnumPropsEx function.
-         * The function receives property entries from a window's property list. 
-         * The PROPENUMPROCEX type defines a pointer to this callback function. 
-         * PropEnumProcEx is a placeholder for the application-defined function name.
-         * 
-         * @param hwnd
-         *          A handle to the window whose property list is being enumerated.
-         * 
-         * @param lpszString
-         *          The string component of a property list entry. 
-         *          This is the string that was specified, along with a data handle, 
-         *          when the property was added to the window's property list via a call to the SetProp function.
-         * 
-         * @param hData
-         *          A handle to the data. This handle is the data component of a property list entry.
-         * 
-         * @param dwData
-         *          Application-defined data. This is the value that was specified as the lParam parameter of the call to EnumPropsEx that initiated the enumeration.
-         * 
-         * @return 
-         *      Return TRUE to continue the property list enumeration.
-         *      Return FALSE to stop the property list enumeration.
-         */
-        public boolean callback(HWND hwnd, WString lpszString, HANDLE hData, ULONG_PTR dwData);
-    }
-    
     public static interface PropEnumProc extends StdCallCallback {
-        public boolean callback(HWND hwnd, String lpszString, HANDLE hData);
+        public boolean callback(HWND hwnd, WString lpszString, HANDLE hData);
     }
 }

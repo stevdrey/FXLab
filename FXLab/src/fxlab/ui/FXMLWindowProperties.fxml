@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
 <?import java.net.*?>
 <?import java.util.*?>
@@ -28,6 +29,8 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Label fx:id="lbl_className" text="Class Name:" />
@@ -38,6 +41,10 @@
                               <TextField fx:id="txt_realClassName" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <TextField fx:id="txt_id" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <TextField fx:id="txt_text" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label fx:id="lbl_backgound" text="Background:" GridPane.rowIndex="4" />
+                              <Label fx:id="lbl_role" text="Role:" GridPane.rowIndex="5" />
+                              <TextField fx:id="txt_role" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <TextField fx:id="txt_background" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                            </children>
                         </GridPane>
                      </children>
@@ -60,6 +67,7 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Label fx:id="lbl_height" text="Height:" />
@@ -78,6 +86,17 @@
                                     <CheckBox fx:id="ckb_fontItalic" disable="true" layoutY="8.0" mnemonicParsing="false" text="Italic" />
                                     <CheckBox fx:id="ckb_fontUnderline" disable="true" layoutX="86.0" layoutY="8.0" mnemonicParsing="false" text="Underline" />
                                     <CheckBox fx:id="ckb_fontStrikeOut" disable="true" layoutX="198.0" layoutY="8.0" mnemonicParsing="false" text="Strike Out" />
+                                 </children>
+                              </Pane>
+                              <Label fx:id="lbl_foreground" text="Foreground:" GridPane.rowIndex="6" />
+                              <Pane fx:id="pn_foregroundContainer" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                 <children>
+                                    <Label fx:id="lbl_foregroundR" layoutX="14.0" layoutY="10.0" text="R:" />
+                                    <TextField fx:id="txt_foregroundR" editable="false" layoutX="36.0" layoutY="6.0" prefHeight="25.0" prefWidth="63.0" />
+                                    <Label fx:id="lbl_foregroundG" layoutX="114.0" layoutY="10.0" text="G:" />
+                                    <TextField fx:id="txt_foregroundG" editable="false" layoutX="135.0" layoutY="6.0" prefHeight="25.0" prefWidth="63.0" />
+                                    <Label fx:id="lbl_foregroundB" layoutX="214.0" layoutY="10.0" text="B:" />
+                                    <TextField fx:id="txt_foregroundB" editable="false" layoutX="234.0" layoutY="6.0" prefHeight="25.0" prefWidth="63.0" />
                                  </children>
                               </Pane>
                            </children>

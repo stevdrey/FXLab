@@ -5,11 +5,13 @@
  */
 package fxlab.win32;
 
+import fxlab.win32.struct.LOGFONT;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.win32.W32APIOptions;
 import fxlab.win32.enu.ObjectConstants;
+import fxlab.win32.enu.StokeObjectConstants;
 
 /**
  *
@@ -96,4 +98,41 @@ public interface GDI32 extends com.sun.jna.platform.win32.GDI32{
      * @return 
      */
     WinNT.HANDLE GetCurrentObject(WinDef.HDC hdc, int uObjectType);
+    
+    /**
+     * The GetStockObject function retrieves a handle to one of the stock pens, brushes, fonts, or palettes.
+     * 
+     * @param fnObject
+     *          The type of stock object. This parameter can be one of the {@link StokeObjectConstants} values.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a handle to the requested logical object.
+     */
+    WinNT.HANDLE GetStockObject(int fnObject);
+    
+    /**
+     * The GetBkColor function returns the current background color for the specified device context.
+     * 
+     * @param hdc
+     *          Handle to the device context whose background color is to be returned.
+     * 
+     * @return 
+     *      If the function succeeds, the return value is a COLORREF value for the current background color.
+     */
+    int GetBkColor(WinDef.HDC hdc);
+    
+    /**
+     * The GetBValue macro retrieves an intensity value for the blue component of a red, green, blue (RGB) value.
+     * 
+     * @param rgb
+     *          Specifies an RGB color value.
+     * 
+     * @return 
+     *      The return value is the intensity of the blue component of the specified RGB color.
+     */
+    int GetBValue(int rgb);
+    
+    int GetRValue(int rgb);
+    
+    int GetGValue(int rgb);
 }

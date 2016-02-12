@@ -5,6 +5,8 @@
  */
 package fxlab;
 
+import com.sun.jna.Callback;
+import com.sun.jna.Native;
 import fxlab.util.DialogUtil;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -35,6 +37,7 @@ public class FXLab extends Application {
             primaryStage.setTitle("FXLab");
             primaryStage.show();
             
+            Native.setProtected(true);
             System.out.println(String.format("OS Name: %s", System.getProperty("os.name")));
         } catch (IOException ex) {
             Logger.getLogger(FXLab.class.getName()).log(Level.SEVERE, null, ex);

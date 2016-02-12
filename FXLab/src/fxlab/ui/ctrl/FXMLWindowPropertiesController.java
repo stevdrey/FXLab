@@ -26,6 +26,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -34,8 +35,12 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.mouse.NativeMouseListener;
@@ -124,6 +129,30 @@ public class FXMLWindowPropertiesController implements Initializable {
     private CheckBox ckb_fontUnderline;
     @FXML
     private CheckBox ckb_fontStrikeOut;
+    @FXML
+    private Label lbl_backgound;
+    @FXML
+    private Label lbl_role;
+    @FXML
+    private TextField txt_role;
+    @FXML
+    private Label lbl_foreground;
+    @FXML
+    private Pane pn_foregroundContainer;
+    @FXML
+    private Label lbl_foregroundR;
+    @FXML
+    private TextField txt_foregroundR;
+    @FXML
+    private Label lbl_foregroundG;
+    @FXML
+    private TextField txt_foregroundG;
+    @FXML
+    private Label lbl_foregroundB;
+    @FXML
+    private TextField txt_foregroundB;
+    @FXML
+    private TextField txt_background;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -158,6 +187,10 @@ public class FXMLWindowPropertiesController implements Initializable {
         this.txt_fontWeight.clear();
         this.txt_fontWidth.clear();
         this.txt_realClassName.clear();
+        this.txt_foregroundB.clear();
+        this.txt_foregroundG.clear();
+        this.txt_foregroundR.clear();
+        this.txt_role.clear();
     }
     
     /**
@@ -241,6 +274,7 @@ public class FXMLWindowPropertiesController implements Initializable {
                         this.txt_id.setText(ctrl.getId());
                         this.txt_text.textProperty().unbind();
                         this.txt_text.textProperty().bind(ctrl.textProperty());
+                        this.txt_role.setText(ctrl.getRoleName());
                         
                         // section of font properties
                         this.txt_faceName.setText(ctrl.getFontControl().getFaceName());
@@ -252,6 +286,16 @@ public class FXMLWindowPropertiesController implements Initializable {
                         this.ckb_fontItalic.setSelected(ctrl.getFontControl().isItalic());
                         this.ckb_fontStrikeOut.setSelected(ctrl.getFontControl().isStrikeOut());
                         this.ckb_fontUnderline.setSelected(ctrl.getFontControl().isUnderline());
+                        
+                        Color c= ctrl.getBackground();
+                        
+                        if (c != null) {
+                            this.txt_background.setText(c.toString());
+                            this.txt_background.setBackground(new Background(new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY)));
+                        } else {
+                            this.txt_background.clear();
+                            this.txt_background.setBackground(Background.EMPTY);
+                        }
                     }
                 } else {
                     DialogUtil.showWarning("Missiging Data", 

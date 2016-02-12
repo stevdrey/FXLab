@@ -5,7 +5,7 @@
  */
 package fxlab.win32.enu;
 
-import fxlab.win32.WinEventProc;
+import fxlab.win32.cb.WinEventProc;
 import java.util.stream.Stream;
 
 /**

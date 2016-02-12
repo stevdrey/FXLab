@@ -5,17 +5,25 @@
  */
 package fxlab.win32;
 
+import fxlab.win32.struct.LOGFONT;
+import fxlab.win32.struct.POINTByValue;
 import com.sun.jna.Native;
+import com.sun.jna.NativeLong;
+import com.sun.jna.platform.win32.COM.COMUtils;
+import com.sun.jna.platform.win32.COM.util.ProxyObject;
+import com.sun.jna.platform.win32.Guid;
 import com.sun.jna.platform.win32.Kernel32Util;
+import com.sun.jna.platform.win32.Variant;
+import com.sun.jna.platform.win32.WTypes;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
-import fxlab.win32.enu.ConstantsMessages;
-import fxlab.win32.enu.DeviceContextConstants;
+import com.sun.jna.ptr.LongByReference;
+import com.sun.jna.ptr.PointerByReference;
 import fxlab.win32.enu.FontConstants;
-import fxlab.win32.enu.ObjectConstants;
 import fxlab.win32.enu.WindowMessagesConstants;
-import fxlab.win32.enu.WindowRegionConstants;
+import java.util.stream.Stream;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -151,11 +159,13 @@ public final class WinApiUtil {
      * @param pid
      *          The number of the Process ID is run the target application.
      * 
+     * @param property
+     * 
      * @return 
      *      This method return the ID ({@code .Name} property in WinForms) of an 
      *      specific window or control
      */
-    public static String getNameProperty(WinDef.HWND handle, IntByReference pid) {
+    public static String getValueProperty(WinDef.HWND handle, IntByReference pid, String property) {
         String result= "";
         
         int size= 65535; //size of memory to be allocated
@@ -172,7 +182,7 @@ public final class WinApiUtil {
         
         try {
             // Register message for know the .Name property of the window Handler pass in parameter
-            msg= WinApiUtil.registerMessage(ConstantsMessages.DOT_NET_GET_CONTROL_NAME.toString());
+            msg= WinApiUtil.registerMessage(property);
         
             // create a process with shared memory.
             processHandle= WinApiUtil.openProcessShared(pid);
@@ -223,48 +233,117 @@ public final class WinApiUtil {
     public static LOGFONT getFontWindow(WinDef.HWND hwnd) {
         LOGFONT lFont= new LOGFONT();
         WinNT.HANDLE hgdiobj= null;
-        WinDef.HDC hdc= User32.INSTANCE_API.GetWindowDC(hwnd);
+        WinDef.HDC hdc= User32.INSTANCE_API.GetDC(hwnd);
         WinDef.LRESULT lresult= User32.INSTANCE_API.SendMessage(hwnd, 
                 WindowMessagesConstants.WM_GETFONT.getValue(), 0, 0);
                 
         if (lresult != null) {            
-            if (lresult.intValue() == 0) 
-                hgdiobj= GDI32.INSTANCE_API.GetCurrentObject(hdc, 
-                        ObjectConstants.OBJ_FONT.getValue());
+            if (lresult.intValue() == 0) {
+                hgdiobj= UxTheme.INSTANCE_API.OpenThemeData(hwnd, 
+                        WinApiUtil.getClassName(hwnd));
                 
-            else 
-                hgdiobj= new WinNT.HANDLE(lresult.toPointer());
-            
-            GDI32.INSTANCE_API.SelectObject(hdc, hgdiobj);
-            int size= GDI32.INSTANCE_API.GetObject(hgdiobj, lFont.size(), lFont);
-            
-            if (size == 0) {
-                System.err.println(String.format("Error when try to get Font of specific Window: %s%n",
+                if (hgdiobj != null) {
+                    WinNT.HRESULT hresult= UxTheme.INSTANCE_API.GetThemeFont(hgdiobj, hdc, 
+                            1, 3, 210, lFont);
+                    
+                    if (hresult.intValue() != 0) {
+                            lFont= null;
+
+                            System.err.println(String.format("Error when try to get Font of specific Window: %s%n",
+                                Kernel32Util.getLastErrorMessage()));
+                        }
+                    }
+
+                    UxTheme.INSTANCE_API.CloseThemeData(hgdiobj);
+                }
+                else {
+                    hgdiobj= UxTheme.INSTANCE_API.OpenThemeData(hwnd, 
+                            WinApiUtil.getClassName(hwnd));
+
+                    if (hgdiobj == null)
+                        System.err.println(String.format("Error when try to get Font of specific Window: %s%n",
+                                Kernel32Util.getLastErrorMessage()));
+
+                    UxTheme.INSTANCE_API.CloseThemeData(hgdiobj);
+
+                    hgdiobj= new WinNT.HANDLE(lresult.toPointer());
+
+                    GDI32.INSTANCE_API.SelectObject(hdc, hgdiobj);
+                    int size= GDI32.INSTANCE_API.GetObject(hgdiobj, lFont.size(), lFont);
+
+                    if (size == 0) {
+                        System.err.println(String.format("Error when try to get Font of specific Window: %s%n",
+                                Kernel32Util.getLastErrorMessage()));
+
+                        lFont= null;
+                    }
+                }
+            }
+
+            User32.INSTANCE_API.ReleaseDC(hwnd, hdc);
+
+            return lFont;
+        }
+
+        public static String getFontFamily(WinDef.HWND hwnd) {
+            String fontFamily= "";
+            char[] buffer= new char[FontConstants.LF_FULLFACESIZE.getValue()];
+            WinDef.HDC hdc= User32.INSTANCE_API.GetDC(hwnd);
+
+            if (GDI32.INSTANCE_API.GetTextFace(hdc, buffer.length, buffer) > 0)
+                fontFamily= Native.toString(buffer);
+
+            else
+                System.err.println(String.format("Error when try to get Font Family Name: %s%n",
                         Kernel32Util.getLastErrorMessage()));
 
-                lFont= null;
-            }
+            User32.INSTANCE_API.ReleaseDC(hwnd, hdc);
+
+            return fontFamily;
         }
+
+        public static String getRoleName(WinDef.HWND hWnd) {
+            PointerByReference ptr= new PointerByReference();
+            StringBuilder role= new StringBuilder();
+            WinNT.HRESULT hresult= Oleacc.INSTANCE_API.AccessibleObjectFromWindow(hWnd, 
+                    0, new Guid.IID("{618736E0-3C3D-11CF-810C-00AA00389B71}"), ptr);
+
+            if (COMUtils.SUCCEEDED(hresult)) {
+                Accessible acc= new Accessible(ptr.getValue());
+                
+                Variant.VARIANT roleId= new Variant.VARIANT();
+                Variant.VARIANT variant= new Variant.VARIANT();
+                variant._variant.__variant.iVal= new WinDef.SHORT(Variant.VT_I4);
+                variant._variant.__variant.lVal= new WinDef.LONG(0);
+
+                System.out.println(String.format("iVal: %d, lVal: %d", variant._variant.__variant.iVal.intValue(), 
+                        variant._variant.__variant.lVal.intValue()));
+                
+                hresult= acc.get_accRole(variant, roleId);
+                
+                if (hresult != null && COMUtils.SUCCEEDED(hresult)) {
+                    char[] buff= new char[1024];
+                    
+                    int res= Oleacc.INSTANCE_API.GetRoleText(roleId._variant.__variant.lVal.intValue(), 
+                            buff, buff.length);
+                    
+                    if (COMUtils.SUCCEEDED(res))
+                        role.append(Native.toString(buff));
+                }
+                    
+            }
         
-        User32.INSTANCE_API.ReleaseDC(hwnd, hdc);
-        
-        return lFont;
+        return role.toString();
     }
     
-    public static String getFontFamily(WinDef.HWND hwnd) {
-        String fontFamily= "";
-        char[] buffer= new char[FontConstants.LF_FULLFACESIZE.getValue()];
-        WinDef.HDC hdc= User32.INSTANCE_API.GetDC(hwnd);
+    public static Color getBackground(WinDef.HWND hWnd) {
+        Color background= null;
+        WinDef.HDC hdc= User32.INSTANCE_API.GetWindowDC(hWnd);
                 
-        if (GDI32.INSTANCE_API.GetTextFace(hdc, buffer.length, buffer) > 0)
-            fontFamily= Native.toString(buffer);
+        background= Color.valueOf(String.valueOf(GDI32.INSTANCE_API.GetBkColor(hdc)));
         
-        else
-            System.err.println(String.format("Error when try to get Font Family Name: %s%n",
-                    Kernel32Util.getLastErrorMessage()));
+        User32.INSTANCE_API.ReleaseDC(hWnd, hdc);
         
-        User32.INSTANCE_API.ReleaseDC(hwnd, hdc);
-        
-        return fontFamily;
+        return background;
     }
 }

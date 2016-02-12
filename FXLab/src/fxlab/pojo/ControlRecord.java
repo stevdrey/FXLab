@@ -6,18 +6,16 @@
 package fxlab.pojo;
 
 import com.sun.jna.Native;
-import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32Util;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.ptr.IntByReference;
 import fxlab.ui.enu.TypeControl;
-import fxlab.win32.COMBOBOXINFOByReference;
+import fxlab.win32.struct.COMBOBOXINFOByReference;
 import fxlab.win32.Kernel32;
-import fxlab.win32.LOGFONT;
+import fxlab.win32.struct.LOGFONT;
 import fxlab.win32.User32;
 import fxlab.win32.WinApiUtil;
-import fxlab.win32.WinEventProc;
+import fxlab.win32.cb.WinEventProc;
 import fxlab.win32.enu.ComboBoxConstants;
 import fxlab.win32.enu.ConstantsMessages;
 import fxlab.win32.enu.EventConstants;
@@ -31,6 +29,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
 
 /**
  * This object store some information of current Window (Control) that user was selected
@@ -49,8 +48,10 @@ public class ControlRecord {
     private StringProperty realClassName= null;
     private StringProperty text= null;
     private StringProperty id= null;
+    private StringProperty role= null;
     
     private ObjectProperty<FontControl> fontControl= null;
+    private ObjectProperty<Color> background= null;
 
     public ControlRecord(WinDef.HWND parent, WinDef.HWND handle) {
         super();
@@ -95,7 +96,8 @@ public class ControlRecord {
     public String getId() {
         if (this.id == null)
             this.id= new SimpleStringProperty(this, "id", 
-                    WinApiUtil.getNameProperty(this.handle, WinApiUtil.getProcessID(this.parent)));
+                    WinApiUtil.getValueProperty(this.handle, WinApiUtil.getProcessID(this.parent), 
+                            ConstantsMessages.DOT_NET_GET_CONTROL_NAME.toString()));
         
         return this.id.getValueSafe();
     }
@@ -122,6 +124,28 @@ public class ControlRecord {
         }
         
         return this.fontControl.getValue();
+    }
+    
+    public Color getBackground() {
+        if (this.background == null) {
+            Color color= WinApiUtil.getBackground(this.handle);
+            
+            if (color != null)
+                this.background= new SimpleObjectProperty<>(this, "background", color);
+            
+            else
+                this.background= new SimpleObjectProperty<>(this, "background", Color.WHITE);
+        }
+        
+        return this.background.getValue();
+    }
+    
+    public String getRoleName() {
+        if (this.role == null)
+            this.role= new SimpleStringProperty(this, "role", 
+                    WinApiUtil.getRoleName(this.handle));
+        
+        return this.role.getValueSafe();
     }
     
     public void dispose() {
